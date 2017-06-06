@@ -26,6 +26,7 @@ struct CRTester;
 #include "Histo.h"
 #include "Cut_enum.h"
 #include "FillInfo.h"
+#include "CRTest.h"
 
 double normPhi(double phi);
 double absnormPhi(double phi);
@@ -36,7 +37,7 @@ using namespace std;
 static const int nTrigReq = 2;
 
 class Analyzer {
-
+  friend class CRTester;
  public:
   Analyzer(string, string, bool setCR = false);
   ~Analyzer();
@@ -59,8 +60,6 @@ class Analyzer {
   double getZeta(const TLorentzVector& Tobj1, const TLorentzVector& Tobj2, string partName) {
     return distats[partName].dmap.at("PZetaCutCoefficient") * getPZeta(Tobj1, Tobj2).first;
   }
-
-  bool partPassBoth(string);
 
  private:
   
@@ -87,7 +86,6 @@ class Analyzer {
   void getGoodRecoLeptons(const Lepton&, const CUTS, const CUTS, const PartStats&);
   void getGoodRecoJets(CUTS, const PartStats&);
 
-  void getGoodMetTopologyLepton(const Lepton&, CUTS,CUTS, const PartStats&);
   void getGoodLeptonCombos(Lepton&, Lepton&, CUTS,CUTS,CUTS, const PartStats&);
   void getGoodDiJets(const PartStats&);
 
@@ -111,6 +109,7 @@ class Analyzer {
   inline bool passCutRange(string, double, const PartStats&);  
 
   void updateMet();
+  void treatMuons_Met();
   double getPileupWeight(float);
   unordered_map<CUTS, vector<int>*, EnumHash> getArray();
 
@@ -139,9 +138,6 @@ class Analyzer {
 
   static const unordered_map<string, CUTS> cut_num;
   static const unordered_map<CUTS, vector<CUTS>, EnumHash> adjList;
-
-
-
 
   vector<int>* trigPlace[nTrigReq];
   bool setTrigger = false;
@@ -174,17 +170,6 @@ class Analyzer {
   bool blinded = true;
 };
 
-
-struct CRTester {
-    
-  const FillVals* info;
-  const string variable;
-  const double cutVal;
-  const string partName;
-
-CRTester(FillVals* _info, string var, double val, string _name) : info(_info), variable(var), cutVal(val), partName(_name) {}
-  bool test(Analyzer* analyzer);
-};
 
 
 

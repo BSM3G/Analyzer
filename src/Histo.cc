@@ -201,10 +201,12 @@ void Histogramer::read_cuts(string filename, vector<string>& folderCuts) {
 
     if(stemp.size() == 3) {
       name = stemp[0];
-      if(name[0]=='*' && name[1]=='*' && name[2]=='*' && folderCuts.size() == 0) {
-	name.erase(0,3);
-	folders.push_back(name);
-	folderToCutNum.push_back(i);
+      if(name[0]=='*' && name[1]=='*' && name[2]=='*') {
+	name.erase(0,3);	
+	if(folderCuts.size() == 0) {
+	  folders.push_back(name);
+	  folderToCutNum.push_back(i);
+	}
       } else if(stemp[1] == "0" && stemp[2] == "-1") continue;   ////remove unnecessary cuts
       cuts[name] = std::make_pair(stoi(stemp[1]),stoi(stemp[2]));
       cut_order.push_back(name);
@@ -266,6 +268,7 @@ void Histogramer::addVal(double value, string group, int maxcut, string histn, d
   }
 
   data[group]->AddPoint(histn, maxFolder, value, weight);
+
 }
 
 void Histogramer::addVal(double valuex, double valuey, string group, int maxcut, string histn, double weight) {

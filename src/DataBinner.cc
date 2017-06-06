@@ -80,6 +80,7 @@ void Piece2D::write_histogram(vector<string>& folders, TFile* outfile) {
 DataBinner::DataBinner(){}
 
 DataBinner::DataBinner(const DataBinner& rhs) : CR(rhs.CR) {
+  cout << "copied" << endl;
   order = rhs.order;
 
   for(auto it: rhs.datamap) {
@@ -93,6 +94,7 @@ DataBinner::DataBinner(const DataBinner& rhs) : CR(rhs.CR) {
 }
 
 DataBinner::DataBinner(DataBinner&& rhs) : CR(rhs.CR) {
+  cout << "moved" << endl;
   for(auto it: datamap) {
     if(it.second != nullptr) {
       delete it.second;
@@ -128,35 +130,35 @@ void DataBinner::Add_Hist(string shortname, string fullname, int binx, double le
 
 
 void DataBinner::AddPoint(string name, int maxfolder, double value, double weight) {
-  if(datamap[name] == nullptr)  return;
+  if(datamap.count(name) == 0)  return;
 
-  
   if(CR) {
-    datamap[name]->bin(maxfolder,value, weight);
-    return;
-  }
-
-  for(int i=0; i < maxfolder; i++) {
-    datamap[name]->bin(i,value, weight);
+    if(maxfolder < 0) return;
+    datamap.at(name)->bin(maxfolder,value, weight);
+  } else {
+    
+    for(int i=0; i < maxfolder; i++) {
+      datamap.at(name)->bin(i,value, weight);
+    }
   }
 }
 
 void DataBinner::AddPoint(string name, int maxfolder, double valuex, double valuey, double weight) {
-  if(datamap[name] == nullptr) return;
+  if(datamap.count(name) == 0) return;
 
   if(CR) {
-    datamap[name]->bin(maxfolder,valuex, valuey, weight);
-    return;
-  }
-
-  for(int i=0; i < maxfolder; i++) {
-    datamap[name]->bin(i,valuex, valuey, weight);
+    if(maxfolder < 0) return;
+    datamap.at(name)->bin(maxfolder,valuex, valuey, weight);
+  } else {
+    for(int i=0; i < maxfolder; i++) {
+      datamap.at(name)->bin(i,valuex, valuey, weight);
+    }
   }
 }
 
 void DataBinner::write_histogram(TFile* outfile, vector<string>& folders) {
   for(vector<string>::iterator it = order.begin(); it != order.end(); it++) {
-    datamap[*it]->write_histogram(folders, outfile);
+    datamap.at(*it)->write_histogram(folders, outfile);
   }
 }
 
