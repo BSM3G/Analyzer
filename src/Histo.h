@@ -26,7 +26,7 @@ using namespace std;
 
 class Histogramer {
 
- public:
+public:
   Histogramer();
   Histogramer(int, string, string, string, bool, vector<string>&);
   Histogramer(const Histogramer&);
@@ -34,7 +34,7 @@ class Histogramer {
   Histogramer& operator=(const Histogramer&);
   Histogramer& operator=(Histogramer&&);
   ~Histogramer();
-  
+
   const unordered_map<string,pair<int,int>>* get_cuts() const {return &cuts;}
   const vector<string>* get_cutorder() const {return &cut_order;}
   const vector<string>* get_groups() const {return &data_order;}
@@ -46,7 +46,7 @@ class Histogramer {
   void fill_histogram();
   void setControlRegions();
 
- private:
+private:
   TFile * outfile;
   string outname;
   int NFolders;
@@ -65,9 +65,8 @@ class Histogramer {
   void read_hist(string);
   void read_cuts(string filename, vector<string>&);
   void fillCRFolderNames(string, int, bool, const vector<string>&);
-  
+
   string extractHistname(string, string) const;
 };
 
 #endif
-

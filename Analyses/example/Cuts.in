@@ -1,3 +1,24 @@
+////////////////////// Cuts ///////////////
+
+//// This file gives all of the multiplicity cuts that are made in the code.  The order of the cuts can be changed
+//// 
+//// The first variable is the name that corresponds to the CUTS enum value that holds the number of "good" 
+//// particles that correspond to the name.  These are defined in the map called "cut_num" in src/Analyzer.cc
+//// The next two numbers are the minimum and maximum number of particles allowed.  -1 corresponds to infinity
+//// ie
+//// NParticleA 2 -1
+//// means the particle "ParticleA" must have at least 2 particles.
+//// The cuts are applied cumulatively, so after a cut, only events that passed that cut will be considered in the
+//// next cut
+
+//// If you want to see the histograms after a specific multiplicity cut, you can make that cut into a folder by
+//// putting *** before the cut name.  The folder will hold histograms that were filled AFTER the cut is applied
+//// ie
+//// ***NParticleB 0 0
+//// means a folder with histograms filled after the cut of have exactly 0 of "ParticleB"
+
+///////////////////////////////////////////
+
 NGenTau		0  -1
 NGenTop		0  -1
 NGenElectron 	0  -1

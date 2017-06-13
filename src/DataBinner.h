@@ -13,54 +13,54 @@
 using namespace std;
 
 /*
-DataPiece: parent class for Piece1D and Piece2D.  Use this polymorphism to make 
+DataPiece: parent class for Piece1D and Piece2D.  Use this polymorphism to make
 using the Databinner a little easier
 
 Contains the public functions for the DataBinner to use:
 
 write_histogram(vector<string>& folders, TFiles* outfile)
-    Writes the histograms stored in the DataPiece into each folder of the outfile.
-    
-    input: folder -- a vector with the names of the folders so the programs can cd into the correct folder
-                 in the outfile
-           outfile -- TFile that the histograms are written out to
+Writes the histograms stored in the DataPiece into each folder of the outfile.
+
+input: folder -- a vector with the names of the folders so the programs can cd into the correct folder
+in the outfile
+outfile -- TFile that the histograms are written out to
 
 bin(int folder, double x, (double y), double weight)
-    Takes in a value and increments the correct histogram by the weight given
-    
-    input: folder -- folder of histogram that will be incremented
-            x (y) -- value of the x axis (and y axis if 2D)
-           weight -- weight given to the value.
+Takes in a value and increments the correct histogram by the weight given
 
- */
+input: folder -- folder of histogram that will be incremented
+x (y) -- value of the x axis (and y axis if 2D)
+weight -- weight given to the value.
+
+*/
 class DataPiece {
- protected:
+protected:
   const string name;
   const int fold_width;
   vector<double> data;
-  
 
- public:
+
+public:
 
   bool is1D;
- DataPiece(string _name, int _Nfold, int _fold_width) : 
+  DataPiece(string _name, int _Nfold, int _fold_width) :
   name(_name), fold_width(_fold_width), data(_Nfold*_fold_width, 0), is1D(true) {};
- virtual ~DataPiece() {};
- virtual void write_histogram(vector<string>&, TFile*) {};
- virtual void bin(int, double, double) {};
- virtual void bin(int, double, double, double) {};
+  virtual ~DataPiece() {};
+  virtual void write_histogram(vector<string>&, TFile*) {};
+  virtual void bin(int, double, double) {};
+  virtual void bin(int, double, double, double) {};
 
 };
 
 
 class Piece1D : public DataPiece {
- private:
+private:
   const double begin, end;
   const int bins;
 
   double  width;
 
- public:
+public:
   Piece1D(string, int, double, double, int);
   void write_histogram(vector<string>&, TFile*);
   int get_bin(double) const;
@@ -69,13 +69,13 @@ class Piece1D : public DataPiece {
 
 
 class Piece2D : public DataPiece {
- private:
+private:
   const double beginx, endx, beginy, endy;
   const int binx, biny;
 
   double widthx, widthy;
 
- public:
+public:
   Piece2D(string, int, double, double, int, double, double, int);
   void write_histogram(vector<string>&, TFile*);
   int get_bin(double, bool) const;
@@ -122,7 +122,7 @@ public:
   void Add_Hist(string, string, int, double, double, int, double, double, int);
   void write_histogram(TFile*, vector<string>&);
   void setControlRegions() {CR = true;}
-  
+
 private:
   unordered_map<string, DataPiece*> datamap;
   vector<string> order;

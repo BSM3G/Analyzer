@@ -2,8 +2,8 @@
 
 using namespace std;
 
-Piece1D::Piece1D(string _name, int _bins, double _begin, double _end, int _Nfold) :  
-  DataPiece(_name, _Nfold, (_bins+2)), begin(_begin), end(_end), bins(_bins), width((end - begin)/bins) {}
+Piece1D::Piece1D(string _name, int _bins, double _begin, double _end, int _Nfold) :
+DataPiece(_name, _Nfold, (_bins+2)), begin(_begin), end(_end), bins(_bins), width((end - begin)/bins) {}
 
 
 int Piece1D::get_bin(double y) const {
@@ -19,7 +19,7 @@ void Piece1D::bin(int folder, double y, double weight) {
 void Piece1D::write_histogram(vector<string>& folders, TFile* outfile) {
   double entries;
   TH1D histogram(name.c_str(), name.c_str(), bins, begin, end);
-  
+
   for(int i =0; i < (int)folders.size(); i++) {
     outfile->cd(folders.at(i).c_str());
     entries = 0;
@@ -36,8 +36,8 @@ void Piece1D::write_histogram(vector<string>& folders, TFile* outfile) {
 /*------------------------------------------------------------------------------------------*/
 
 Piece2D::Piece2D(string _name, int _binx, double _beginx, double _endx, int _biny, double _beginy, double _endy, int _Nfold) :
-  DataPiece(_name, _Nfold, (_binx+2)*(_biny+2)), beginx(_beginx), endx(_endx), beginy(_beginy), endy(_endy), binx(_binx), biny(_biny),  widthx((endx - beginx)/binx), widthy((endy - beginy)/biny) {
-  
+DataPiece(_name, _Nfold, (_binx+2)*(_biny+2)), beginx(_beginx), endx(_endx), beginy(_beginy), endy(_endy), binx(_binx), biny(_biny),  widthx((endx - beginx)/binx), widthy((endy - beginy)/biny) {
+
   is1D = false;
 }
 
@@ -54,7 +54,7 @@ void Piece2D::bin(int folder, double x, double y, double weight) {
   int by = (y < beginy) ? -1 : get_bin(y, false);
   by = (y > endy) ? biny+1 : by+1;
   data[fold_width*folder + bx + by*(binx+2)] += weight;
-  
+
 }
 
 void Piece2D::write_histogram(vector<string>& folders, TFile* outfile) {
@@ -62,7 +62,7 @@ void Piece2D::write_histogram(vector<string>& folders, TFile* outfile) {
   TH2D histogram(name.c_str(), name.c_str(), binx, beginx, endx, biny, beginy, endy);
 
   for(size_t i =0; i < folders.size(); i++) {
-    
+
     outfile->cd(folders.at(i).c_str());
     entries = 0;
     for(int j = 0; j < (binx+2)*(biny+2); j++) {
@@ -75,8 +75,8 @@ void Piece2D::write_histogram(vector<string>& folders, TFile* outfile) {
   }
 }
 
-/*---------------------------------------------------------------------------------------*/			      
- 
+/*---------------------------------------------------------------------------------------*/
+
 DataBinner::DataBinner(){}
 
 DataBinner::DataBinner(const DataBinner& rhs) : CR(rhs.CR) {
@@ -98,7 +98,7 @@ DataBinner::DataBinner(DataBinner&& rhs) : CR(rhs.CR) {
   for(auto it: datamap) {
     if(it.second != nullptr) {
       delete it.second;
-      it.second = nullptr; 
+      it.second = nullptr;
     }
   }
 
@@ -136,7 +136,7 @@ void DataBinner::AddPoint(string name, int maxfolder, double value, double weigh
     if(maxfolder < 0) return;
     datamap.at(name)->bin(maxfolder,value, weight);
   } else {
-    
+
     for(int i=0; i < maxfolder; i++) {
       datamap.at(name)->bin(i,value, weight);
     }
@@ -161,4 +161,3 @@ void DataBinner::write_histogram(TFile* outfile, vector<string>& folders) {
     datamap.at(*it)->write_histogram(folders, outfile);
   }
 }
-

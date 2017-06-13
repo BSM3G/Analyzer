@@ -2,7 +2,7 @@ runfiles = "PartDet/"
 
 compare = "Analyses/example/"
 
-files = ["Cuts.in", "DiParticle_info.in", "ElectronTau_info.in", "Electron_info.in", "Gen_info.in", "Jet_info.in", "MuonElectron_info.in", "MuonTau_info.in", "Muon_info.in", "Run_info.in", "Tau_info.in", "VBFCuts_info.in"]
+files = ["Cuts.in", "DiParticle_info.in", "ElectronTau_info.in", "Electron_info.in", "Gen_info.in", "Jet_info.in", "FatJet_info.in", "MuonElectron_info.in", "MuonTau_info.in", "Muon_info.in", "Run_info.in", "Tau_info.in", "VBFCuts_info.in"]
 
 for onefile in files:
     f = open(compare+onefile, 'r')
@@ -36,7 +36,7 @@ for onefile in files:
                 print "In Run files, but not example"
                 foundnotinrun = True
             print splitline[0]
-        else: 
+        else:
             mapper[splitline[0]] = True
     foundnotinex = False
     for val, found in mapper.items():
@@ -47,10 +47,10 @@ for onefile in files:
                 print "In Example files, but not run"
                 foundnotinex = True
             if not foundnotinex:
-                print 
+                print
                 print "In Example files, but not run"
             print val
-                
+
     if foundnotinex or foundnotinrun:
-        print 
+        print
 

@@ -153,5 +153,8 @@ Tau1MatchingDeltaR 0.3
 Tau2MatchingDeltaR 0.3
 
 ApplyJetBTagging 1
-JetBTaggingCut 0.600
-MatchBToGen   0
+JetBTaggingCut  0.600
+MatchBToGen     0
+UseBtagSF       1
+
+

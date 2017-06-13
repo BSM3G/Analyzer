@@ -29,11 +29,11 @@ struct PartStats {
 };
 
 
-enum class PType { Electron, Muon, Tau, Jet, None};
+enum class PType { Electron, Muon, Tau, Jet, FatJet, None};
 
 class Particle {
 
- public:
+public:
   Particle();
   Particle(TTree*, string, string);
   virtual ~Particle() {}
@@ -41,22 +41,22 @@ class Particle {
   virtual void findExtraCuts() {}
 
   vector<CUTS> extraCuts;
-  
-  void unBranch();
-  PType type;  
 
-  const map<PType,CUTS> cutMap = {{PType::Electron, CUTS::eGElec}, {PType::Muon, CUTS::eGMuon}, 
-				  {PType::Tau, CUTS::eGTau}};
-  
-  
+  void unBranch();
+  PType type;
+
+  const map<PType,CUTS> cutMap = {{PType::Electron, CUTS::eGElec}, {PType::Muon, CUTS::eGMuon},
+  {PType::Tau, CUTS::eGTau}};
+
+
   vector<double>* pt = 0;
   vector<double>* eta = 0;
   vector<double>* phi = 0;
   vector<double>* energy = 0;
   unordered_map<string, PartStats> pstats;
   vector<TLorentzVector> smearP;
-  
- protected:
+
+protected:
   void getPartStats(string);
   TTree* BOOM;
   string GenName;
@@ -102,7 +102,7 @@ public:
   Jet(TTree*, string);
 
   unordered_map<CUTS, string, EnumHash> jetNameMap = {
-    {CUTS::eRJet1, "Jet1"},               {CUTS::eRJet2, "Jet2"}, 
+    {CUTS::eRJet1, "Jet1"},               {CUTS::eRJet2, "Jet2"},
     {CUTS::eRCenJet, "CentralJet"},      {CUTS::eRBJet, "BJet"},
     {CUTS::eR1stJet, "FirstLeadingJet"},  {CUTS::eR2ndJet, "SecondLeadingJet"}
   };
@@ -119,17 +119,41 @@ public:
   vector<double>* chargedEmEnergyFraction = 0;
   vector<int>*    partonFlavour = 0;
   vector<double>* bDiscriminator = 0;
+  vector<double>* tau1 = 0;
+  vector<double>* tau2 = 0;
+  vector<double>* tau3 = 0;
+  vector<double>* PrunedMass = 0;
+  vector<double>* SoftDropMass = 0;
+};
+
+class FatJet : public Particle {
+
+public:
+  FatJet(TTree*, string);
+
+  unordered_map<CUTS, string, EnumHash> jetNameMap = {
+    {CUTS::eRWjet, "Wjet"}
+  };
+
+  void findExtraCuts();
+  vector<CUTS> overlapCuts(CUTS);
+
+  vector<double>* tau1 = 0;
+  vector<double>* tau2 = 0;
+  vector<double>* tau3 = 0;
+  vector<double>* PrunedMass = 0;
+  vector<double>* SoftDropMass = 0;
 };
 
 class Lepton : public Particle {
 
-public: 
+public:
   Lepton(TTree*, string, string);
 
   void findExtraCuts();
 
   vector<double>* charge = 0;
-  
+
   virtual bool get_Iso(int, double, double) const {return false;}
 };
 
@@ -140,50 +164,50 @@ public:
 
   bool get_Iso(int, double, double) const;
 
-   vector<int>     *isPassVeto = 0;
-   vector<int>     *isPassLoose = 0;
-   vector<int>     *isPassMedium = 0;
-   vector<int>     *isPassTight = 0;
-   vector<int>     *isPassHEEPId = 0;
-   vector<double>  *isoChargedHadrons = 0;
-   vector<double>  *isoNeutralHadrons = 0;
-   vector<double>  *isoPhotons = 0;
-   vector<double>  *isoPU = 0;
+  vector<int>     *isPassVeto = 0;
+  vector<int>     *isPassLoose = 0;
+  vector<int>     *isPassMedium = 0;
+  vector<int>     *isPassTight = 0;
+  vector<int>     *isPassHEEPId = 0;
+  vector<double>  *isoChargedHadrons = 0;
+  vector<double>  *isoNeutralHadrons = 0;
+  vector<double>  *isoPhotons = 0;
+  vector<double>  *isoPU = 0;
 };
 
 
 
 class Muon : public Lepton {
 
-public: 
+public:
   Muon(TTree*, string);
 
   bool get_Iso(int, double, double) const;
 
-   vector<bool>* tight = 0;
-   vector<bool>* soft = 0;
-   vector<double>* isoCharged = 0;
-   vector<double>* isoNeutralHadron = 0;
-   vector<double>* isoPhoton = 0;
-   vector<double>* isoPU = 0;
+  vector<bool>* tight = 0;
+  vector<bool>* soft = 0;
+  vector<double>* isoCharged = 0;
+  vector<double>* isoNeutralHadron = 0;
+  vector<double>* isoPhoton = 0;
+  vector<double>* isoPU = 0;
 };
 
 class Taus : public Lepton {
 
- public:
+public:
   Taus(TTree*, string);
 
   void findExtraCuts();
 
   bool get_Iso(int, double, double) const;
 
-   vector<int>     *decayModeFindingNewDMs = 0;
-   vector<double>  *nProngs = 0;
-   pair<vector<int>*,vector<int>* > againstElectron = make_pair(nullptr,nullptr);
-   pair<vector<int>*,vector<int>* > againstMuon = make_pair(nullptr,nullptr);
-   pair<vector<int>*,vector<int>* > minIso = make_pair(nullptr,nullptr);
-   pair<vector<int>*,vector<int>* > maxIso = make_pair(nullptr,nullptr);
-   vector<double>  *leadChargedCandPt = 0;
+  vector<int>     *decayModeFindingNewDMs = 0;
+  vector<double>  *nProngs = 0;
+  pair<vector<int>*,vector<int>* > againstElectron = make_pair(nullptr,nullptr);
+  pair<vector<int>*,vector<int>* > againstMuon = make_pair(nullptr,nullptr);
+  pair<vector<int>*,vector<int>* > minIso = make_pair(nullptr,nullptr);
+  pair<vector<int>*,vector<int>* > maxIso = make_pair(nullptr,nullptr);
+  vector<double>  *leadChargedCandPt = 0;
 };
 
 

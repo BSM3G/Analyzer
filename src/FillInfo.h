@@ -11,15 +11,15 @@ struct FillVals {
 
   FillVals(): type(FILLER::None) {}
   FillVals(CUTS _ePos): ePos(_ePos), type(FILLER::None), part(nullptr), part2(nullptr) {}
-  FillVals(CUTS _ePos, FILLER _type, Particle* _part, Particle* _part2=nullptr) : 
-     ePos(_ePos), type(_type), part(_part), part2(_part2) { }
+  FillVals(CUTS _ePos, FILLER _type, Particle* _part, Particle* _part2=nullptr) :
+  ePos(_ePos), type(_type), part(_part), part2(_part2) { }
 
 };
 
 struct GenFill {
   int status;
   CUTS ePos;
-GenFill(int _status, CUTS _ePos) : status(_status), ePos(_ePos) {}
+  GenFill(int _status, CUTS _ePos) : status(_status), ePos(_ePos) {}
 };
 
 

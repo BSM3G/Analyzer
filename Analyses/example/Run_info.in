@@ -5,6 +5,8 @@
 CalculatePUSystematics true
 DataHistos PU2016data_6p2ifb.root
 MCHistos PU2016MC.root
+DataPUHistName NVertices_0
+MCPUHistName NVertices_0
 
 isData false
 ApplyGenWeight  true
