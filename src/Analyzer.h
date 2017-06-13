@@ -25,6 +25,10 @@ struct CRTester;
 
 #include "Particle.h"
 #include "Histo.h"
+
+/////fix
+#include "./btagging/BTagCalibrationStandalone.h"
+
 #include "Cut_enum.h"
 #include "FillInfo.h"
 #include "CRTest.h"
@@ -147,7 +151,6 @@ private:
   vector<int>* trigPlace[nTrigReq];
   bool setTrigger = false;
   vector<string>* trigName[nTrigReq];
-
   vector<int> cuts_per, cuts_cumul;
 
   TLorentzVector theMETVector;
@@ -164,6 +167,10 @@ private:
   float nTruePU = 0;
   int bestVertices = 0;
   double gen_weight = 0;
+
+  BTagCalibration calib = BTagCalibration("csvv1", "Pileup/btagging.csv");
+  BTagCalibrationReader reader = BTagCalibrationReader(BTagEntry::OP_TIGHT, "central");
+
   double Met[3] = {0, 0, 0};
 
 

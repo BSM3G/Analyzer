@@ -15,6 +15,7 @@ endif
 LIBS=
 
 SRCDIR = src
+BTAGDIR = $(SRCDIR)/btagging
 OBJDIR = obj
 EXE = Analyzer
 
@@ -22,12 +23,17 @@ EXE = Analyzer
 SOURCES = $(wildcard src/*.cc)
 OBJECTS = $(SOURCES:$(SRCDIR)/%.cc=$(OBJDIR)/%.o)
 
+BTAGSRC = $(wildcard $(BTAGDIR)/*.cpp)
+BTAGOBJ = $(BTAGSRC:$(BTAGDIR)/%.cpp=$(OBJDIR)/%.o)
+
 #------------------------------------------------------------------------------
 
 all: $(EXE)
 
-$(EXE): $(OBJECTS)
+
+$(EXE): $(OBJECTS) $(BTAGOBJ)
 	$(LD) $(LDFLAGS) -o $@ $^ $(LIBS)
+
 
 obj/main.o: src/main.cc
 	$(CXX) $(CXXFLAGS) -c $< -o $@
@@ -38,6 +44,8 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.cc $(SRCDIR)/%.h
 %: $(OBJDIR)/%.o
 	$(LD) -o $@ $(LDFLAGS) $<  $(LIBS)
 
+$(OBJDIR)/%.o: $(BTAGDIR)/%.cpp $(BTAGDIR)/%.h
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean :
 	rm $(OBJDIR)/*

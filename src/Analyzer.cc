@@ -23,6 +23,8 @@ typedef vector<int>::iterator vec_iter;
 const string PUSPACE = "Pileup/";
 
 
+//////////PUBLIC FUNCTIONS////////////////////
+
 const vector<CUTS> Analyzer::genCuts = {
   CUTS::eGTau, CUTS::eNuTau, CUTS::eGTop,
   CUTS::eGElec, CUTS::eGMuon, CUTS::eGZ,
@@ -47,12 +49,10 @@ const unordered_map<CUTS, vector<CUTS>, EnumHash> Analyzer::adjList = {
   {CUTS::eElec1Tau2, {CUTS::eRElec1, CUTS::eRTau2}},
   {CUTS::eElec2Tau1, {CUTS::eRElec2, CUTS::eRTau1}},
   {CUTS::eMuon2Tau2, {CUTS::eRElec2, CUTS::eRTau2}},
-
   {CUTS::eMuon1Elec1, {CUTS::eRMuon1, CUTS::eRElec1}},
   {CUTS::eMuon1Elec2, {CUTS::eRMuon1, CUTS::eRElec2}},
   {CUTS::eMuon2Elec1, {CUTS::eRMuon2, CUTS::eRElec1}},
   {CUTS::eMuon2Elec2, {CUTS::eRMuon2, CUTS::eRElec2}},
-
   {CUTS::eDiElec, {CUTS::eRElec1, CUTS::eRElec2, CUTS::eR1stJet, CUTS::eR2ndJet}},
   {CUTS::eDiMuon, {CUTS::eRMuon1, CUTS::eRMuon2, CUTS::eR1stJet, CUTS::eR2ndJet}},
   {CUTS::eDiTau, {CUTS::eRTau1, CUTS::eRTau2, CUTS::eR1stJet, CUTS::eR2ndJet}},
@@ -115,6 +115,8 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
   BOOM->SetBranchStatus("*", 0);
   std::cout << "TOTAL EVENTS: " << nentries << std::endl;
 
+  srand(0);
+
   for(int i=0; i < nTrigReq; i++) {
     vector<int>* tmpi = new vector<int>();
     vector<string>* tmps = new vector<string>();
@@ -126,6 +128,9 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
   filespace+="/";
 
   setupGeneral(BOOM);
+
+  reader.load(calib, BTagEntry::FLAV_B, "comb");
+
 
   isData = distats["Run"].bmap.at("isData");
   CalculatePUSystematics = distats["Run"].bmap.at("CalculatePUSystematics");
@@ -333,9 +338,9 @@ void Analyzer::clear_values() {
 ///Function that does most of the work.  Calculates the number of each particle
 void Analyzer::preprocess(int event) {
   BOOM->GetEntry(event);
-
   theMETVector.SetPxPyPzE(Met[0], Met[1], Met[2], sqrt(pow(Met[0],2) + pow(Met[1],2)));
   pu_weight = (!isData && CalculatePUSystematics) ? hPU[(int)(nTruePU+1)] : 1.0;
+
 
   // SET NUMBER OF GEN PARTICLES
   if(!isData){
@@ -347,9 +352,9 @@ void Analyzer::preprocess(int event) {
   smearLepton(*_Electron, CUTS::eGElec, _Electron->pstats["Smear"]);
   smearLepton(*_Muon, CUTS::eGMuon, _Muon->pstats["Smear"]);
   smearLepton(*_Tau, CUTS::eGTau, _Tau->pstats["Smear"]);
-
   smearJet(*_Jet,_Jet->pstats["Smear"]);
   smearJet(*_FatJet,_FatJet->pstats["Smear"]);
+
 
   //////Triggers and Vertices
   goodParts[CUTS::eRVertex]->resize(bestVertices);
@@ -367,17 +372,16 @@ void Analyzer::preprocess(int event) {
   getGoodRecoLeptons(*_Tau, CUTS::eRTau1, CUTS::eGTau, _Tau->pstats["Tau1"]);
   getGoodRecoLeptons(*_Tau, CUTS::eRTau2, CUTS::eGTau, _Tau->pstats["Tau2"]);
 
-
   getGoodRecoJets(CUTS::eRJet1, _Jet->pstats["Jet1"]);
   getGoodRecoJets(CUTS::eRJet2, _Jet->pstats["Jet2"]);
   getGoodRecoJets(CUTS::eRCenJet, _Jet->pstats["CentralJet"]);
   getGoodRecoJets(CUTS::eRBJet, _Jet->pstats["BJet"]);
-
   getGoodRecoJets(CUTS::eR1stJet, _Jet->pstats["FirstLeadingJet"]);
   getGoodRecoJets(CUTS::eR2ndJet, _Jet->pstats["SecondLeadingJet"]);
 
   getGoodRecoFatJets(CUTS::eRWjet, _FatJet->pstats["Wjet"]);
   treatMuons_Met();
+
 
   ///VBF Susy cut on leadin jets
   VBFTopologyCut(distats["VBFSUSY"]);
@@ -405,6 +409,7 @@ void Analyzer::preprocess(int event) {
 
   ////Dijet cuts
   getGoodDiJets(distats["DiJet"]);
+
 
   if( event < 10 || ( event < 100 && event % 10 == 0 ) ||
     ( event < 1000 && event % 100 == 0 ) ||
@@ -443,6 +448,7 @@ void Analyzer::fillCuts() {
       maxCut += (prevTrue) ? 1 : 0;
     } else prevTrue = false;
   }
+
 
 }
 
@@ -1088,7 +1094,19 @@ void Analyzer::getGoodRecoJets(CUTS ePos, const PartStats& stats) {
     if(stats.bmap.at("RemoveOverlapWithTau2s") && isOverlaping(lvec, *_Tau, CUTS::eRTau2, stats.dmap.at("Tau2MatchingDeltaR"))) continue;
 
     /////fill up array
+
+    if(ePos == CUTS::eRBJet && stats.bmap.at("UseBtagSF") && !isData) {
+      double bjet_SF = reader.eval_auto_bounds("central", BTagEntry::FLAV_B, lvec.Eta(), lvec.Pt());
+      if(bjet_SF > 1) {
+        cout << "didn't pass" << endl;
+      }
+      if(((double) rand()/(RAND_MAX)) >  bjet_SF) {
+        continue;
+      }
+    }
+
     goodParts[ePos]->push_back(i);
+
   }
 
   //clean up for first and second jet
@@ -1670,6 +1688,10 @@ void Analyzer::fill_Folder(string group, const int max) {
 
       part1 = lep1->smearP.at(p1);
       part2 = lep2->smearP.at(p2);
+      double add_px = (part1.Pt() * cos(part1.Phi())) + (part2.Pt() * cos(part2.Phi()));
+      double add_py = (part1.Pt() * sin(part1.Phi())) + (part2.Pt() * sin(part2.Phi()));
+//    TLorentzVector add_p = part1 + part2;
+      double mag_addp2 = pow(add_px, 2) + pow(add_py, 2);
 
 
       //do our dirty tree stuff here:
@@ -1681,18 +1703,19 @@ void Analyzer::fill_Folder(string group, const int max) {
       histAddVal2(part1.Pt(),part2.Pt(), "Part1PtVsPart2Pt");
       histAddVal(part1.DeltaR(part2), "DeltaR");
       if(group.find("Di") != string::npos) {
-        histAddVal((part1.Pt() - part2.Pt()) / (part1.Pt() + part2.Pt()), "DeltaPtDivSumPt");
-        histAddVal(part1.Pt() - part2.Pt(), "DeltaPt");
+	histAddVal((part1.Pt() - part2.Pt()) / (part1.Pt() + part2.Pt()), "DeltaPtDivSumPt");  
+	histAddVal(part1.Pt() - part2.Pt(), "DeltaPt");
+	histAddVal(TMath::Sqrt(mag_addp2), "Boost");
       } else {
-        histAddVal((part2.Pt() - part1.Pt()) / (part1.Pt() + part2.Pt()), "DeltaPtDivSumPt");
-        histAddVal(part2.Pt() - part1.Pt(), "DeltaPt");
+	histAddVal((part2.Pt() - part1.Pt()) / (part1.Pt() + part2.Pt()), "DeltaPtDivSumPt");  
+	histAddVal(part2.Pt() - part1.Pt(), "DeltaPt");
+	histAddVal(TMath::Sqrt(mag_addp2), "Boost");
       }
       histAddVal(cos(absnormPhi(part2.Phi() - part1.Phi())), "CosDphi");
       histAddVal(absnormPhi(part1.Phi() - theMETVector.Phi()), "Part1MetDeltaPhi");
       histAddVal2(absnormPhi(part1.Phi() - theMETVector.Phi()), cos(absnormPhi(part2.Phi() - part1.Phi())), "Part1MetDeltaPhiVsCosDphi");
       histAddVal(absnormPhi(part2.Phi() - theMETVector.Phi()), "Part2MetDeltaPhi");
       histAddVal(cos(absnormPhi(atan2(part1.Py() - part2.Py(), part1.Px() - part2.Px()) - theMETVector.Phi())), "CosDphi_DeltaPtAndMet");
-
       double diMass = diParticleMass(part1,part2, distats[digroup].smap.at("HowCalculateMassReco"));
       if(passDiParticleApprox(part1,part2, distats[digroup].smap.at("HowCalculateMassReco"))) {
         histAddVal(diMass, "ReconstructableMass");
