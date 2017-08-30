@@ -372,7 +372,10 @@ Muon::Muon(TTree* _BOOM, string filename, vector<string> syst_names) : Lepton(_B
 
   if(mu1.bfind("DoDiscrByTightID") || mu2.bfind("DoDiscrByTightID")) {
     SetBranch("Muon_tight", tight);
-     }
+  }
+  if(mu1.bfind("DoDiscrByMediumID") || mu2.bfind("DoDiscrByMediumID")) {
+    SetBranch("Muon_medium", medium);
+  }
   if(mu1.bfind("DoDiscrBySoftID") || mu2.bfind("DoDiscrBySoftID")) {
     SetBranch("Muon_soft", soft);
   }

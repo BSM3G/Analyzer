@@ -225,6 +225,7 @@ public:
   bool get_Iso(int, double, double) const;
 
   vector<bool>* tight = 0;
+  vector<bool>* medium = 0;
   vector<bool>* soft = 0;
   vector<double>* isoCharged = 0;
   vector<double>* isoNeutralHadron = 0;

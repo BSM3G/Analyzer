@@ -23,6 +23,9 @@ DeltaPtDivSumPtCutValue    0.4  1.0
 DiscrByDeltaPt 		   false
 DeltaPtCutValue 	   50.0   1000.0
 
+DiscrByCosDphiPtAndMet        false
+CosDphiPtAndMetCut            -1. -0.9 
+
 ######################################
                DiMuon
 #####################################
@@ -50,6 +53,9 @@ DiscrByDeltaPtDivSumPt     0
 DeltaPtDivSumPtCutValue    0.1  1.0
 DiscrByDeltaPt 		   true
 DeltaPtCutValue 	   30.0   9999.0
+
+DiscrByCosDphiPtAndMet        false
+CosDphiPtAndMetCut            -1. -0.9
 
 ########################################
                DiElectron
@@ -79,6 +85,8 @@ DeltaPtDivSumPtCutValue    0.1  1.0
 DiscrByDeltaPt 		   0
 DeltaPtCutValue 	   30.0   1000.0
 
+DiscrByCosDphiPtAndMet        false
+CosDphiPtAndMetCut            -1. -0.9
 
 #########################################
                DiJet

@@ -10,7 +10,8 @@ MCPUHistName pileup
 UsePileUpWeight  true
 
 isData false
-ApplyGenWeight  false
+ApplyGenWeight  true
+ApplyTauIDSF true
 
 ///------Triggers-----///
 

@@ -37,6 +37,7 @@ struct CRTester;
 #include "JetScaleResolution.h"
 #include "DepGraph.h"
 
+
 double normPhi(double phi);
 double absnormPhi(double phi);
 
@@ -120,6 +121,8 @@ private:
   bool isInTheCracks(float);
   bool passedLooseJetID(int);
   bool select_mc_background();
+  double getTauDataMCScaleFactor(int updown);
+
 
   pair<double, double> getPZeta(const TLorentzVector&, const TLorentzVector&);
   void create_fillInfo();
@@ -166,6 +169,7 @@ private:
   vector<unordered_map<CUTS, vector<int>*, EnumHash>> syst_parts;
   unordered_map<CUTS, bool, EnumHash> need_cut;
   unordered_map<string,bool> gen_selection;
+
   vector<Particle*> allParticles;
   vector<string> syst_names;
 
