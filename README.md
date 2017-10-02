@@ -36,9 +36,9 @@ setup complete
  *** Break *** segmentation violation
 
 ===========================================================
-There was a crash. 
+There was a crash.
 This is the entire stack trace of all threads:
-=========================================================== 
+===========================================================
 ...
 ...
 ###  0x00007fc6e0d9d3f7 in std::__throw_out_of_range (__s=__s entry=0x47dd90 "_Map_base::at") at ../../../../../libstdc++-v3/src/c++11/functexcept.cc:90
@@ -46,9 +46,9 @@ This is the entire stack trace of all threads:
 ```
 This is a map out of bound error.  This means one of your values is not named correctly or is being parsed as the wrong values.  To check which values, look at the top of the stack.  I should look something like this:
 ```
-The lines below might hint at the cause of the crash. 
+The lines below might hint at the cause of the crash.
 If they do not help you then please submit a bug report at
-http://root.cern.ch/bugs. Please post the ENTIRE stack trace 
+http://root.cern.ch/bugs. Please post the ENTIRE stack trace
 from above as an attachment in addition to anything else
 that might help us fixing this issue.
 ===========================================================
@@ -68,7 +68,7 @@ In this example, we can see in line #12, the function called getGoodRecoLeptons,
 
 If the Error looks like:
 ```
-$ ./Analyzer TNT.root test.root 
+$ ./Analyzer TNT.root test.root
 setup start
 TOTAL EVENTS: 493
 Error in <TTree::SetBranchStatus>: unknown branch -> Tau_byTightIsolationMVArun2v1DBnewDMwLT
@@ -76,7 +76,7 @@ Error in <TTree::SetBranchAddress>: unknown branch -> Tau_byTightIsolationMVArun
 setup complete
 
  *** Break *** segmentation violation
- 
+
 ===========================================================
 There was a crash.
 This is the entire stack trace of all threads:
@@ -85,23 +85,23 @@ This is the entire stack trace of all threads:
 ...
 ...
 ```
-The error is being thrown by ROOT because some of the Branches haven't been set correctly.  This can happen because the nTuples for 74x and 80x have different names, or because the name is simply mispelled.  ROOT tells you which branch has been set wrong so just go into PartDet/Tau_info.in and change the name there.  To find the names of the branches, simply list them by typing 
+The error is being thrown by ROOT because some of the Branches haven't been set correctly.  This can happen because the nTuples for 74x and 80x have different names, or because the name is simply mispelled.  ROOT tells you which branch has been set wrong so just go into PartDet/Tau_info.in and change the name there.  To find the names of the branches, simply list them by typing
 ```
 cat NOTES
 ```
 ### Met Cut
 
-The MET has been changed how it's implimented in the old code.  To make sure your MET is working properly, make sure you MET cut information is in the file ```PartDet/Run_info.in```.  The python script ```moveMET.py``` should do this for you if you have any doubts.  
+The MET has been changed how it's implimented in the old code.  To make sure your MET is working properly, make sure you MET cut information is in the file ```PartDet/Run_info.in```.  The python script ```moveMET.py``` should do this for you if you have any doubts.
 
-You must also tell the program to cut on the MET if required.  This is implimented in much the same was the multiplicity cuts in the file ```PartDet/Cuts.in```.  Simply put 
+You must also tell the program to cut on the MET if required.  This is implimented in much the same was the multiplicity cuts in the file ```PartDet/Cuts.in```.  Simply put
 ```
 METCut          1   -1
-``` 
+```
 in the Cuts.in file to make sure the file removes events that don't pass MET cuts (or MHT and HT cuts for that matter).  Because of the change, the MET cut can be put in any order in relation to the other cuts so you can see how MET effects cut flow efficiency
 
 ### Folders
 
-Folders in the program are made when reading PartDet/Cuts.in.  By default, the program will always make the last significant cut (range is not [0,-1]) into a folder.  To add folders, simply put ```***``` before the cut without any space.  
+Folders in the program are made when reading PartDet/Cuts.in.  By default, the program will always make the last significant cut (range is not [0,-1]) into a folder.  To add folders, simply put ```***``` before the cut without any space.
 
 e.g.
 ```
@@ -122,7 +122,7 @@ All of the Histograms are stored in PartDet/Hist_info.in.  On each line, the det
 <NAME>  <BINS>  <MIN>  <MAX>   // OR
 <NAME 2D>  <XBINS> <XMIN>  <XMAX>  <YBINS>  <YMIN>  <YMAX>
 ```
-Since the histogram information is read at the beginning of each run, the binning and domain of the histogram can be changed to fit the analysis.  
+Since the histogram information is read at the beginning of each run, the binning and domain of the histogram can be changed to fit the analysis.
 
 As with all of the info files, the file supports C and python style line commenting (// and #).  This means, to remove a specific histogram, simply comment it out
 

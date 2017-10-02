@@ -29,7 +29,7 @@ class Histogramer {
 
 public:
   Histogramer();
-  Histogramer(int, string, string, string, bool, vector<string>&);
+  Histogramer(int, string, string, string, bool, vector<string>&, const vector<string> &syst_unvertainties={});
   Histogramer(const Histogramer&);
   Histogramer(Histogramer&&);
   Histogramer& operator=(const Histogramer&);
@@ -55,7 +55,7 @@ private:
   string outname;
   int NFolders;
   int Npdf;
-  bool isData, CR=false;
+  bool isData, fillSingle=false;
 
   unordered_map<string, pair<int,int>> cuts;
   vector<string> cut_order;
@@ -69,6 +69,7 @@ private:
 
   void read_hist(string);
   void read_cuts(string filename, vector<string>&);
+  void read_syst(const vector<string>& syst_uncertainties);
   void fillCRFolderNames(string, int, bool, const vector<string>&);
 
   string extractHistname(string, string) const;
