@@ -5,13 +5,16 @@
 DiscrByDeltaR  true
 DeltaRCut      0.3
 
-DiscrByOSLSType  None	#### OS or LS
+DiscrByOSLSType  OS	#### OS or LS
 DiscrByCosDphi	 false
 CosDphiCut 	 -1.00   -0.80
 
 DiscrByMassReco  false
-HowCalculateMassReco  VectorSumOfVisProductsAndMet       ###VectorSumOfVisProductsAndMet   or    CollinearApprox 
-MassCut          100.0   10000.0
+HowCalculateMassReco InvariantMass ### VectorSumOfVisProductsAndMet       ###VectorSumOfVisProductsAndMet   or    CollinearApprox 
+MassCut          0.0   100.0
+
+DiscrByCosDphiPtAndMet        false
+CosDphiPtAndMetCut            -1. -0.9 
 
 DiscrByCDFzeta2D          false
 PZetaCutCoefficient       1.0
@@ -27,17 +30,17 @@ DeltaPtCutValue 	   50.0   1000.0
                DiMuon
 #####################################
 
-DiscrByDeltaR  1
+DiscrByDeltaR  0
 DeltaRCut      0.3 
 
-DiscrByOSLSType  OS
+DiscrByOSLSType  None
 DiscrByCosDphi	 0
 CosDphiCut 	 -1.00   -0.95
 
 DiscrByCosDphi_DeltaPtAndMet   false
 CosDphi_DeltaPtMetCut  0.8  1.0
 
-DiscrByMassReco  true
+DiscrByMassReco  false
 HowCalculateMassReco VectorSumOfVisProductsAndMet     ###VectorSumOfVisProductsAndMet   or    CollinearApprox 
 MassCut          150.0   10000.0
 
@@ -48,18 +51,18 @@ CDFzeta2DCutValue         -50.0    1000
 
 DiscrByDeltaPtDivSumPt     0
 DeltaPtDivSumPtCutValue    0.1  1.0
-DiscrByDeltaPt 		   true
+DiscrByDeltaPt 		   false
 DeltaPtCutValue 	   30.0   9999.0
 
 ########################################
                DiElectron
 #######################################
 
-DiscrByDeltaR  1
+DiscrByDeltaR  0
 DeltaRCut      0.3 
 
 DiscrByOSLSType  No
-DiscrByCosDphi	 true
+DiscrByCosDphi	 false
 CosDphiCut 	 -1.00   -0.95
 
 DiscrByCosDphi_DeltaPtAndMet   false
@@ -84,14 +87,14 @@ DeltaPtCutValue 	   30.0   1000.0
                DiJet
 #####################################
 
-DiscrByDeltaR true
+DiscrByDeltaR false
 DeltaRCut 0.3
 
 DiscrByDeltaEta      false
 DeltaEtaCut         4.2  9999.0
 DiscrByDeltaPhi      false
 DeltaPhiCut         0    9999.0
-DiscrByOSEta true
+DiscrByOSEta false
 DiscrByCosDphi false
 CosDphiCut  -1.00 -0.80
 

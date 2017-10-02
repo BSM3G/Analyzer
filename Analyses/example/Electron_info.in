@@ -2,7 +2,7 @@
               Smear
 /////////////////////////////////
 
-SmearTheParticle 1
+SmearTheParticle 0
 PtScaleOffset 1.
 PtSigmaOffset 1.
 EtaScaleOffset 1.
@@ -24,16 +24,16 @@ MotherID 23.
 //---RECO CUTS---///
 
 EtaCut 2.1
-PtCut 20.0 9999.9
+PtCut 10.0 9999.9
 
-DoDiscrByIsolation 0
+DoDiscrByIsolation 1
 IsoSumPtCutValue 0.0 0.4
 
 DoDiscrByVetoID false
 DoDiscrByLooseID false
 DoDiscrByMediumID false
-DoDiscrByTightID 0
-DoDiscrByHEEPID true
+DoDiscrByTightID 1
+DoDiscrByHEEPID false
 
 ///---MET TOPOLOGY CUTS---///
 
@@ -52,16 +52,16 @@ MetMtCut 0. 40.
 //---RECO CUTS---///
 
 EtaCut 2.1
-PtCut 20.0 9999.9
+PtCut 10.0 9999.9
 
-DoDiscrByIsolation 0
-IsoSumPtCutValue 0.1 0.2
+DoDiscrByIsolation 1
+IsoSumPtCutValue 0.0 0.4
 
 DoDiscrByVetoID false
 DoDiscrByLooseID false
-DoDiscrByMediumID 0
-DoDiscrByTightID false
-DoDiscrByHEEPID 0
+DoDiscrByMediumID false
+DoDiscrByTightID 1
+DoDiscrByHEEPID false
 
 ///---MET TOPOLOGY CUTS---///
 

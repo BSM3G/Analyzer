@@ -38,19 +38,12 @@ GenTauEta          72  -3.6      +3.6
 GenTauPhi          36  -3.15     +3.15
 GenHadTauPt       5000   0.     5000.
 GenHadTauEta       72  -3.6      +3.6
+//NGenMuon           20   0.       20.
+//GenMuonEnergy     200   0.      500.
+//GenMuonPt         200   0.      500.
+//GenMuonEta         72  -3.6      +3.6
+//GenMuonPhi         36  -3.15     +3.15
 GenDiTauMass      10000   0.    10000.
-NGenZ              20   0.       20.
-GenZPt         200   0.      500.
-GenZEta         72  -3.6      +3.6
-GenZMass      10000   0.    10000.
-NGenW              20   0.       20.
-GenWPt         200   0.      500.
-GenWEta         72  -3.6      +3.6
-GenWMass      10000   0.    10000.
-
-
-//GenZPhi         36  -3.15     +3.15
-
 
 //////GenZprimeMass    100 0. 10000.      NOT IMPLIMENTED
 //////GenZprimeStatusCode     100 0. 100.

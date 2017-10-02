@@ -13,7 +13,9 @@ EnergyScaleOffset 1.
 EnergySigmaOffset 1.
 
 MatchToGen 0
-GenMatchingDeltaR 0.1
+GenMatchingDeltaR 0.4
+
+TauSF 1. 
 
 //////////////////////////////
             Tau1
@@ -21,37 +23,37 @@ GenMatchingDeltaR 0.1
 
 //RECO CUTS///
 
-EtaCut 2.5
+EtaCut 2.1
 PtCut 20.0 9999.9
 
-DoDiscrByLeadTrack false
-LeadTrackThreshold 3.0
+DoDiscrByLeadTrack true
+LeadTrackThreshold 5.0
 
-
-DoDiscrByIsolation false
+DoDiscrByIsolation true
 DiscrByMinIsolation ZERO
 DiscrByMaxIsolation byTightIsolationMVArun2v1DBnewDMwLT
-DiscrByProngType 1or2or3hps
+DiscrByProngType true
+ProngType  1or3hps
 
-DoDiscrAgainstElectron false
+DoDiscrAgainstElectron true
 DiscrAgainstElectron againstElectronMVALooseMVA6
 SelectTausThatAreElectrons false
 
-DoDiscrAgainstMuon false
+DoDiscrAgainstMuon true
 DiscrAgainstMuon againstMuonTight3
 SelectTausThatAreMuons false
 
-DoDiscrByCrackCut true
+DoDiscrByCrackCut false
 
-RemoveOverlapWithMuon1s false
-RemoveOverlapWithMuon2s false
-Muon1MatchingDeltaR 0.01
-Muon2MatchingDeltaR 0.01
+RemoveOverlapWithMuon1s true
+RemoveOverlapWithMuon2s true
+Muon1MatchingDeltaR 0.3
+Muon2MatchingDeltaR 0.3
 
-RemoveOverlapWithElectron1s false
-RemoveOverlapWithElectron2s false
-Electron1MatchingDeltaR 0.01
-Electron2MatchingDeltaR 0.01
+RemoveOverlapWithElectron1s true
+RemoveOverlapWithElectron2s true
+Electron1MatchingDeltaR 0.3
+Electron2MatchingDeltaR 0.3
 
 ///---MET TOPOLOGY CUTS---//
 
@@ -67,42 +69,43 @@ MetMtCut 0.0    50.0
 
 //----RECO CUTS----////
 
-EtaCut 2.5
+EtaCut 2.1
 PtCut 20.0 9999.9
 
-DoDiscrByLeadTrack 0
+DoDiscrByLeadTrack false
 LeadTrackThreshold 5.0
 
-DoDiscrByIsolation false
+DoDiscrByIsolation true
 DiscrByMinIsolation ZERO
 DiscrByMaxIsolation byTightIsolationMVArun2v1DBnewDMwLT
-DiscrByProngType 1or2or3hps
+DiscrByProngType true
+ProngType  1or3hps
 
-DoDiscrAgainstElectron 0
+DoDiscrAgainstElectron true
 DiscrAgainstElectron againstElectronMVALooseMVA6
-SelectTausThatAreElectrons 0
+SelectTausThatAreElectrons false
 
-DoDiscrAgainstMuon 0
+DoDiscrAgainstMuon true
 DiscrAgainstMuon againstMuonTight3
-SelectTausThatAreMuons 0
+SelectTausThatAreMuons false
 
 DoDiscrByCrackCut 0
 
-RemoveOverlapWithMuon1s 0
-RemoveOverlapWithMuon2s 0
+RemoveOverlapWithMuon1s true
+RemoveOverlapWithMuon2s true
 Muon1MatchingDeltaR 0.3
 Muon2MatchingDeltaR 0.3
 
-RemoveOverlapWithElectron1s 0
-RemoveOverlapWithElectron2s 0
+RemoveOverlapWithElectron1s true
+RemoveOverlapWithElectron2s true
 Electron1MatchingDeltaR 0.3
 Electron2MatchingDeltaR 0.3
 
 //-----MET TOPOLOGY CUTS-----//
 
-DiscrByMetDphi 0
+DiscrByMetDphi false
 MetDphiCut 1.30   3.15
 
-DiscrByMetMt 0
+DiscrByMetMt false
 MetMtCut 0.0 40.0
 

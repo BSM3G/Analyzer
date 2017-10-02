@@ -1,17 +1,24 @@
 #include "Histo.h"
+#include "unistd.h"
 
 Histogramer::Histogramer() : outfile(nullptr) {}
 
-Histogramer::Histogramer(int _Npdf, string histname, string cutname, string outfilename, bool _isData, vector<string>& folderCuts):
+Histogramer::Histogramer(int _Npdf, string histname, string cutname, string outfilename, bool _isData, vector<string>& folderCuts, const vector<string> &syst_unvertainties ):
 outfile(nullptr), outname(outfilename), Npdf(_Npdf), isData(_isData) {
 
-  read_cuts(cutname, folderCuts);
+  //no syst uncertainty hist object
+  if (syst_unvertainties.size()==0){
+    read_cuts(cutname, folderCuts);
+  }else{
+    read_syst(syst_unvertainties);
+  }
+
   NFolders = folders.size();
   read_hist(histname);
 
-  if(folderCuts.size() != 0) {
-    CR = true;
-    for(auto it: data) it.second->setControlRegions();
+  if(folderCuts.size() != 0 || syst_unvertainties.size() != 0) {
+    fillSingle = true;
+    for(auto it: data) it.second->setSingleFill();
   }
 }
 
@@ -29,7 +36,7 @@ Histogramer& Histogramer::operator=(const Histogramer& rhs) {
   folderToCutNum = rhs.folderToCutNum;
   data_order.reserve(rhs.data_order.size());
   data_order = rhs.data_order;
-  CR = rhs.CR;
+  fillSingle = rhs.fillSingle;
 
   for(auto mit: rhs.data) {
     data[mit.first] = new DataBinner(*(mit.second));
@@ -55,7 +62,7 @@ Histogramer& Histogramer::operator=(Histogramer&& rhs) {
   folderToCutNum = rhs.folderToCutNum;
 
   data_order = rhs.data_order;
-  CR = rhs.CR;
+  fillSingle = rhs.fillSingle;
   data.swap(rhs.data);
 
   rhs.data.clear();
@@ -66,7 +73,7 @@ Histogramer& Histogramer::operator=(Histogramer&& rhs) {
 
 
 Histogramer::Histogramer(const Histogramer& rhs) :
-outname(rhs.outname), NFolders(rhs.NFolders), isData(rhs.isData), CR(rhs.CR)
+outname(rhs.outname), NFolders(rhs.NFolders), isData(rhs.isData), fillSingle(rhs.fillSingle)
 {
   cuts = rhs.cuts;
   cut_order = rhs.cut_order;
@@ -84,7 +91,7 @@ outname(rhs.outname), NFolders(rhs.NFolders), isData(rhs.isData), CR(rhs.CR)
 }
 
 Histogramer::Histogramer(Histogramer&& rhs) :
-outname(rhs.outname), NFolders(rhs.NFolders), isData(rhs.isData), CR(rhs.CR)
+outname(rhs.outname), NFolders(rhs.NFolders), isData(rhs.isData), fillSingle(rhs.fillSingle)
 {
   cuts = rhs.cuts;
   cut_order = rhs.cut_order;
@@ -103,10 +110,10 @@ Histogramer::~Histogramer() {
   if(outfile != nullptr)
     outfile->Close();
 
-  for(auto it: data_order) {
-    delete data[it];
-    data[it] = nullptr;
-  }
+  // for(auto it: data_order) {
+  //   delete data[it];
+  //   data[it] = nullptr;
+  // }
 }
 
 
@@ -228,6 +235,18 @@ void Histogramer::read_cuts(string filename, vector<string>& folderCuts) {
 }
 
 
+void Histogramer::read_syst(const vector<string>& syst_uncertainties) {
+
+  int i=0;
+  for(const string &syst : syst_uncertainties){
+    folders.push_back(syst);
+    folderToCutNum.push_back(i);
+    i++;
+  }
+
+}
+
+
 void Histogramer::fillCRFolderNames(string sofar, int index, bool isFirst, const vector<string>& variables) {
   if(index >= (int)variables.size()) {
     folders.push_back(sofar);
@@ -244,7 +263,11 @@ void Histogramer::fillCRFolderNames(string sofar, int index, bool isFirst, const
 
 void Histogramer::fill_histogram() {
 
-  outfile = new TFile(outname.c_str(), "RECREATE");
+  if( access( outname.c_str(), F_OK ) == -1 ){
+    outfile = new TFile(outname.c_str(), "RECREATE");
+  }else{
+    outfile = new TFile(outname.c_str(), "UPDATE");
+  }
   for(auto it: folders) {
     outfile->mkdir( it.c_str() );
   }
@@ -259,7 +282,7 @@ void Histogramer::addVal(double value, string group, int maxcut, string histn, d
   int maxFolder=0;
 
 
-  if(CR) maxFolder = maxcut;
+  if(fillSingle) maxFolder = maxcut;
   else {
     for(int i = 0; i < NFolders; i++) {
       if(maxcut > folderToCutNum[i]) maxFolder++;
@@ -274,7 +297,7 @@ void Histogramer::addVal(double value, string group, int maxcut, string histn, d
 void Histogramer::addVal(double valuex, double valuey, string group, int maxcut, string histn, double weight) {
   int maxFolder=0;
 
-  if(CR) maxFolder = maxcut;
+  if(fillSingle) maxFolder = maxcut;
   else {
     for(int i = 0; i < NFolders; i++) {
       if(maxcut > folderToCutNum[i]) maxFolder++;

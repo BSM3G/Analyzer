@@ -9,15 +9,15 @@ bool CRTester::partPassBoth(Analyzer* analyzer) {
   if(partName == "Muon1Muon2") {
     ePart1 = CUTS::eRMuon1;
     ePart2 = CUTS::eRMuon2;
-    diffsize = analyzer->_Muon->smearP.size();      
+    diffsize = analyzer->_Muon->size();
   } else if(partName == "Electron1Electron2") {
     ePart1 = CUTS::eRElec1;
     ePart2 = CUTS::eRElec2;
-    diffsize = analyzer->_Electron->smearP.size();
+    diffsize = analyzer->_Electron->size();
   } else if(partName == "Tau1Tau2") {
     ePart1 = CUTS::eRTau1;
     ePart2 = CUTS::eRTau2;
-    diffsize = analyzer->_Tau->smearP.size();
+    diffsize = analyzer->_Tau->size();
   }
   vector<int>* part1 = analyzer->goodParts[ePart1];
   vector<int>* part2 = analyzer->goodParts[ePart2];
@@ -42,18 +42,18 @@ bool CRTester::test(Analyzer* analyzer) {
     if(variable == "PassBoth") return partPassBoth(analyzer);
 
     for(auto index: *analyzer->getList(info->ePos)) {
-  
-      TLorentzVector part = info->part->smearP.at(index);
+
+      TLorentzVector part = info->part->p4(index);
       if(variable == "Eta") pass = pass && part.Eta() > cutVal;
       else if(variable == "Pt") pass = pass && part.Pt() > cutVal;
       else if(variable == "Energy") pass = pass && part.Energy() > cutVal;
 
-    }	  
+    }
   } else if(info->type == FILLER::Dipart) {
     for(auto index: *analyzer->getList(info->ePos)) {
 
-      TLorentzVector part1 = info->part->smearP.at(index / BIG_NUM);
-      TLorentzVector part2 = info->part2->smearP.at(index % BIG_NUM);
+      TLorentzVector part1 = info->part->p4(index / BIG_NUM);
+      TLorentzVector part2 = info->part2->p4(index % BIG_NUM);
       if(variable == "DeltaR") pass = pass && part1.DeltaR(part2) > cutVal;
       else if(variable == "DeltaPtDivSumPt") pass = pass && ((part1.Pt() - part2.Pt()) / (part1.Pt() + part2.Pt()) > cutVal);
       else if(variable == "DeltaPt") pass = pass && ((part1.Pt() - part2.Pt()) > cutVal);
@@ -63,7 +63,12 @@ bool CRTester::test(Analyzer* analyzer) {
       else if(variable == "DeltaEta") pass = pass && (abs(part1.Eta() - part2.Eta()) > cutVal);
       else if(variable == "DeltaPhi") pass = pass && (abs(part1.Phi() - part2.Phi()) > cutVal);
       else if(variable == "OSEta") pass = pass && (part1.Eta() * part2.Eta() > cutVal);
-    }   
+      else if(variable == "DiscrByOSLSType"){
+        if(info->ePos==CUTS::eDiElec || info->ePos==CUTS::eDiMuon || info->ePos==CUTS::eDiTau ){
+          pass = pass && (info->part->charge(index / BIG_NUM) * info->part2->charge(index % BIG_NUM) > cutVal);
+        }
+      }
+    }
   } else {
 
     if(variable == "Met") pass = (analyzer->getMet() > cutVal);
