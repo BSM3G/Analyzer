@@ -52,6 +52,10 @@ public:
   void printCuts();
   void writeout();
   int nentries;
+  void checkParticleDecayList(int);
+  void writeParticleDecayList(int, fstream&);
+  bool checkforW();
+  bool checkforZ();
   void fill_histogram();
   void setControlRegions() { histo.setControlRegions();}
 
@@ -111,6 +115,11 @@ private:
   bool passedLooseJetID(int);
 
   pair<double, double> getPZeta(const TLorentzVector&, const TLorentzVector&);
+  //double getZBoostWeight(const TLorentzVector&, const TLorentzVector&);
+  //double getZBoostWeight(const TLorentzVector&, const TLorentzVector&);
+  double getWBoostWeight();
+  double getZBoostWeight();
+  double getParallelRecoilWeight(const TLorentzVector&, const TLorentzVector&);
   void create_fillInfo();
 
   inline bool passCutRange(string, double, const PartStats&);

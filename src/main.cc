@@ -102,18 +102,22 @@ int main (int argc, char* argv[]) {
   //catch ctrl+c and just exit the loop
   //this way we still have the output
   signal(SIGINT,KeyboardInterrupt_endJob);
-
-
-  for(int i=0; i < testing.nentries; i++) {
+  //fstream f;  commented-out 7.27.17
+  //f.open("particle_decay_list.txt", fstream::out | fstream::trunc);  commented-out 7.27.17
+  for(int i=0; i < testing.nentries; i++){ 
+    //for(int i=0; i < 50; i++) {  commented-out 7.27.17
+    //f << "Event: " << i << endl;  commented-out 7.27.17
     testing.clear_values();
     testing.preprocess(i);
+    //testing.writeParticleDecayList(i, f);  commented-out 7.27.17
     testing.fill_histogram();
-    //this will be set if ctrl+c is pressed
+    //this will be set if ctrl+c is pressed  //commented-out7.27.17
     if(do_break){
       testing.nentries=i;
       break;
     }
   }
+  //f.close();  //commented-out 7.27.17
   testing.printCuts();
   return 0;
 }

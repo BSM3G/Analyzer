@@ -1,0 +1,29 @@
+/////////// Control Region /////////////
+
+//// This files allows for control regions to be processed using the analyzer code.  To activate control regions
+//// run the code with the CR option, ie
+////    ./Analyzer -CR <infile> <outfile>
+////
+//// The variables for control regions work by giving the fill group the variable is associated with and then
+//// the variable.  Most fill groups are obvious based on the particle (Muon1's fill group is simple Muon1), but
+//// other variables may have different, less obvious ones (eg VBF related cuts have the fill group "LeadingJets")
+//// After this, the point that the control region is to be made at is given
+//// ie
+////     <Fill Group>_<Variable>  <value>
+////
+//// When running over data, to make sure the signal region is blinded in studying (since all regions are made 
+////  when the code runs), the signal region needs to be defined and then the "Unblind" variable needs to be set 
+//// to true or false.  To define the signal region, a ">" or "<" must be given for each control region variable
+//// simply using the greater than or less than for whether the signal region is greater than or less than the 
+//// given value for the variable
+
+////////////////////////////////
+
+Control_Region
+
+Run_Met  50
+Muon1Muon2_PassBoth  10
+
+SR <>
+Unblind  false
+//Muon1Tau1_Mass 100

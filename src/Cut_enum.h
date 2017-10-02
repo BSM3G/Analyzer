@@ -52,7 +52,7 @@ struct EnumHash {
 
 enum class CUTS {
   eGen,
-  eGTau,        eGTop,        eGElec,       eGMuon,       eGZ,        eGW,       eGHiggs,
+    eGTau,        eGTop,        eGElec,       eGMuon,       eGZ,        eGW,       eGHiggs,
   eRVertex,     eRMuon1,      eRMuon2,      eRElec1,      eRElec2,    eRTau1,   eRTau2,
   eRJet1,       eRJet2,       eRCenJet,     eR1stJet,     eR2ndJet,   eRBJet,   eRWjet,
   eDiElec,      eDiMuon,      eDiTau,       eDiJet,

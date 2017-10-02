@@ -1,0 +1,27 @@
+Gen
+
+TauPtCut -10.0  10000.0 
+TauEtaCut 10.0
+
+TauID 15.
+TauStatus 2.
+
+TopID 6.
+TopStatus 2.
+
+ElectronID 11.
+ElectronStatus 1.
+
+MuonID 13.
+MuonStatus 1.
+
+ZID 23.
+ZStatus 2.
+
+WID 24.
+WStatus 2.
+
+HiggsID 25.
+HiggsStatus 2.
+
+

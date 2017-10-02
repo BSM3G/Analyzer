@@ -1,0 +1,15 @@
+####################################
+           Systematics
+####################################
+
+useSystematics 0
+
+################################
+         Muon_systematics
+################################
+#minimal pt and maximal eta
+pt_min  30
+eta_max 2.8
+
+muon_scale 0.05
+muon_res  0.032
