@@ -1,5 +1,6 @@
 #include "Histo.h"
 #include "unistd.h"
+#include "Compression.h"
 
 Histogramer::Histogramer() : outfile(nullptr) {}
 
@@ -109,11 +110,6 @@ outname(rhs.outname), NFolders(rhs.NFolders), isData(rhs.isData), fillSingle(rhs
 Histogramer::~Histogramer() {
   if(outfile != nullptr)
     outfile->Close();
-
-  // for(auto it: data_order) {
-  //   delete data[it];
-  //   data[it] = nullptr;
-  // }
 }
 
 
@@ -264,9 +260,9 @@ void Histogramer::fillCRFolderNames(string sofar, int index, bool isFirst, const
 void Histogramer::fill_histogram() {
 
   if( access( outname.c_str(), F_OK ) == -1 ){
-    outfile = new TFile(outname.c_str(), "RECREATE");
+    outfile = new TFile(outname.c_str(), "RECREATE", outname.c_str(), ROOT::CompressionSettings(ROOT::kLZMA, 9));
   }else{
-    outfile = new TFile(outname.c_str(), "UPDATE");
+    outfile = new TFile(outname.c_str(), "UPDATE", outname.c_str(), ROOT::CompressionSettings(ROOT::kLZMA, 9));
   }
   for(auto it: folders) {
     outfile->mkdir( it.c_str() );
@@ -275,8 +271,24 @@ void Histogramer::fill_histogram() {
   for(auto it: data_order) {
     data[it]->write_histogram(outfile, folders);
   }
+  outfile->cd();
+  for (std::unordered_map<std::string, TTree * >::iterator it = trees.begin(); it != trees.end(); ++it) {
+    it->second->Write();
+  }
   outfile->Close();
 }
+
+void Histogramer::createTree(unordered_map< string , float > *m, string name){
+  trees[name] = new TTree(name.c_str(), name.c_str());
+  for (unordered_map< string , float >::iterator it = m->begin(); it != m->end(); it++) {
+    trees[name]->Branch(it->first.c_str(), &(it->second), (it->first+"/F").c_str());
+  }
+}
+
+void Histogramer::fillTree(string name) {
+  trees[name]->Fill();
+}
+
 
 void Histogramer::addVal(double value, string group, int maxcut, string histn, double weight) {
   int maxFolder=0;

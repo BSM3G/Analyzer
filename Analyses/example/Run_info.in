@@ -29,6 +29,7 @@ TreatMuonsAsTaus 0
 
 ///-----MET cuts------///
 
+MT2Mass 0.
 DiscrByMet false
 MetCut 30.0 10000.0
 

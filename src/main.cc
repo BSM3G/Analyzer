@@ -60,8 +60,10 @@ void parseCommandLine(int argc, char *argv[], vector<string> &inputnames, string
       usage();
     }else if(inputnames.size()==0){
       inputnames.push_back(argv[arg]);
+      cout << "Analyser: Inputfilelist " << inputnames.back() << endl;
     }else if(outputname==""){
       outputname = argv[arg];
+      cout << "Analyser: Outputfile " << outputname << endl;
     }
   }
 

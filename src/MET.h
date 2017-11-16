@@ -15,6 +15,7 @@
 #include <TBranch.h>
 #include <TLorentzVector.h>
 #include "Particle.h"
+#include "mt2/mt2_bisect.hh"
 
 
 #include "tokenizer.hpp"
@@ -28,7 +29,7 @@ class Met {
 
 public:
   Met();
-  Met(TTree*, string, vector<string>);
+  Met(TTree*, string, vector<string>, double);
   virtual ~Met() {}
 
   virtual void findExtraCuts() {}
@@ -43,11 +44,13 @@ public:
   double HT() const;
   double MHT() const;
   double MHTphi() const;
+  double MT2(TLorentzVector&, TLorentzVector&);
   TLorentzVector p4() const;
   TLorentzVector& p4();
 
   void addPtEtaPhiESyst(double, double, double, double, int);
   void addP4Syst(TLorentzVector, int);
+  void setMT2Mass(double);
   void setCurrentP(int);
   string getName() {return GenName;};
   void update(PartStats&, Jet&, int);
@@ -68,13 +71,17 @@ public:
 protected:
   TTree* BOOM;
   string GenName;
+  vector<string> syst_names;
+  double MT2mass;
+  
   double mMet[3] = {0, 0, 0};
   //note this is only for pt and phi
   double MetUnclUp[2] = {0, 0};
   double MetUnclDown[2] = {0, 0};
-  vector<string> syst_names;
   int Unclup=-1;
   int Uncldown=-1;
+  mt2_bisect::mt2 mt2_event;
+  
 
 };
 

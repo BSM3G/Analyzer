@@ -10,10 +10,10 @@
 #include <TH1.h>
 #include <TH2.h>
 #include <TFile.h>
+#include <TTree.h>
 #include <string>
 #include <vector>
 #include <unordered_map>
-#include <boost/unordered_map.hpp>
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
@@ -45,6 +45,9 @@ public:
   void addVal(double, double, string, int, string, double);
   void fill_histogram();
   void setControlRegions();
+  void createTree(unordered_map< string , float >*, string);
+  void fillTree(string);
+
 
 private:
   TFile * outfile;
@@ -59,8 +62,9 @@ private:
   vector<string> folders;
   vector<int> folderToCutNum;
 
-  boost::unordered_map<string, DataBinner*> data;
+  unordered_map<string, DataBinner*> data;
   vector<string> data_order;
+  std::unordered_map<string, TTree * > trees;
 
   void read_hist(string);
   void read_cuts(string filename, vector<string>&);

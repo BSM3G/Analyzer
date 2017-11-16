@@ -57,6 +57,7 @@ public:
   void writeout();
   int nentries;
   void fill_histogram();
+  void fill_Tree();
   void setControlRegions() { histo.setControlRegions();}
 
   vector<int>* getList(CUTS ePos) {return goodParts[ePos];}
@@ -81,6 +82,9 @@ private:
   void getInputs();
   void setupJob(string);
   void initializePileupInfo(string, string, string, string);
+  void initializeMCSelection(vector<string> infiles);
+  void initializeWkfactor(vector<string> infiles);
+  
   void read_info(string);
   void setupGeneral();
   void initializeTrigger();
@@ -122,12 +126,11 @@ private:
   bool passedLooseJetID(int);
   bool select_mc_background();
   double getTauDataMCScaleFactor(int updown);
+  double getWkfactor();
+  double getZBoostWeight();
 
   pair<double, double> getPZeta(const TLorentzVector&, const TLorentzVector&);
   void create_fillInfo();
-
-  double getZBoostWeight();
-
 
   inline bool passCutRange(string, double, const PartStats&);
   bool passCutRange(double, const pair<double, double>&);
@@ -172,9 +175,15 @@ private:
   unordered_map<CUTS, bool, EnumHash> need_cut;
 
   unordered_map<string,bool> gen_selection;
+  
+  TH1D* k_ele_h;
+  TH1D* k_mu_h;
+  TH1D* k_tau_h;
   regex genName_regex;
   
   bool isVSample;
+  bool isWSample;
+  
 
   vector<Particle*> allParticles;
   vector<string> syst_names;
@@ -188,6 +197,8 @@ private:
   bool setTrigger = false;
   vector<string>* trigName[nTrigReq];
   vector<int> cuts_per, cuts_cumul;
+  
+  unordered_map< string,float > zBoostTree;
 
   double maxIso, minIso;
   int leadIndex, maxCut, crbins=1;
@@ -222,4 +233,3 @@ private:
 
 
 #endif
-

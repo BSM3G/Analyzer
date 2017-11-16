@@ -126,11 +126,11 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
   }
 
   _Electron = new Electron(BOOM, filespace + "Electron_info.in", syst_names);
-  _Muon = new Muon(BOOM, filespace + "Muon_info.in", syst_names);
-  _Tau = new Taus(BOOM, filespace + "Tau_info.in", syst_names);
-  _Jet = new Jet(BOOM, filespace + "Jet_info.in", syst_names);
-  _FatJet = new FatJet(BOOM, filespace + "FatJet_info.in", syst_names);
-  _MET  = new Met(BOOM, "Met_type1PF" , syst_names);
+  _Muon     = new Muon(BOOM, filespace + "Muon_info.in", syst_names);
+  _Tau      = new Taus(BOOM, filespace + "Tau_info.in", syst_names);
+  _Jet      = new Jet(BOOM, filespace + "Jet_info.in", syst_names);
+  _FatJet   = new FatJet(BOOM, filespace + "FatJet_info.in", syst_names);
+  _MET      = new Met(BOOM, "Met_type1PF" , syst_names, distats["Run"].dmap.at("MT2Mass"));
 
   if(!isData) {
     _Gen = new Generated(BOOM, filespace + "Gen_info.in", syst_names);
@@ -183,6 +183,30 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
   systematics = Systematics(distats);
   jetScaleRes = JetScaleResolution("Pileup/Summer16_23Sep2016V4_MC_Uncertainty_AK4PFchs.txt", "",  "Pileup/Spring16_25nsV6_MC_PtResolution_AK4PFchs.txt", "Pileup/Spring16_25nsV6_MC_SF_AK4PFchs.txt");
 
+  ///this can be done nicer
+  //put the variables that you use here:
+  zBoostTree["tau1_pt"] =0;
+  zBoostTree["tau1_eta"]=0;
+  zBoostTree["tau1_phi"]=0;
+  zBoostTree["tau2_pt"] =0;
+  zBoostTree["tau2_eta"]=0;
+  zBoostTree["tau2_phi"]=0;
+  zBoostTree["met"]     =0;
+  zBoostTree["mt_tau1"] =0;
+  zBoostTree["mt_tau2"] =0;
+  zBoostTree["mt2"]     =0;
+  zBoostTree["cosDphi1"]=0;
+  zBoostTree["cosDphi2"]=0;
+  zBoostTree["jet1_pt"] =0;
+  zBoostTree["jet1_eta"]=0;
+  zBoostTree["jet1_phi"]=0;
+  zBoostTree["jet2_pt"] =0;
+  zBoostTree["jet2_eta"]=0;
+  zBoostTree["jet2_phi"]=0;
+  zBoostTree["jet_mass"]=0;
+  
+
+  histo.createTree(&zBoostTree,"TauTauTree");
 
 
   if(setCR) {
@@ -200,41 +224,15 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
   }
   // check if we need to make gen level cuts to cross clean the samples:
 
-  isVSample = false;
-  if(infiles[0].find("DY") != string::npos){
-    isVSample = true;
-    if(infiles[0].find("DYJetsToLL_M-50_HT-") != string::npos){
-      //gen_selection["DY_noMass_gt_100"]=true;
-      gen_selection["DY_noMass_gt_200"]=true;
-    //get the DY1Jet DY2Jet ...
-    }else if(infiles[0].find("JetsToLL_TuneCUETP8M1_13TeV") != string::npos){
-      gen_selection["DY_noMass_gt_200"]=true;
-    }else{
-      //set it to false!!
-      gen_selection["DY_noMass_gt_200"]=false;
-    }
-    if(infiles[0].find("DYJetsToLL_M-50_TuneCUETP8M1_13TeV") != string::npos){
-      gen_selection["DY_noMass_gt_200"]=true;
-    }else{
-      //set it to false!!
-      gen_selection["DY_noMass_gt_100"]=false;
-    }
-  }else{
-    //set it to false!!
-    gen_selection["DY_noMass_gt_200"]=false;
-    gen_selection["DY_noMass_gt_100"]=false;
-  }
-
-  if(infiles[0].find("WJets") != string::npos){
-    isVSample = true;
-  }
 
   for(auto iselect : gen_selection){
     if(iselect.second){
       cout<<"Waning: The selection "<< iselect.first<< " is active!"<<endl;
     }
   }
-
+  
+  initializeMCSelection(infiles);
+  initializeWkfactor(infiles);
   setCutNeeds();
 
   std::cout << "setup complete" << std::endl << endl;
@@ -266,7 +264,7 @@ void Analyzer::create_fillInfo() {
   fillInfo["FillJet2"] =       new FillVals(CUTS::eRJet2, FILLER::Single, _Jet);
   fillInfo["FillBJet"] =       new FillVals(CUTS::eRBJet, FILLER::Single, _Jet);
   fillInfo["FillCentralJet"] = new FillVals(CUTS::eRCenJet, FILLER::Single, _Jet);
-  fillInfo["FillWJet"] =     new FillVals(CUTS::eRWjet, FILLER::Single, _FatJet);
+  fillInfo["FillWJet"] =       new FillVals(CUTS::eRWjet, FILLER::Single, _FatJet);
 
   fillInfo["FillDiElectron"] = new FillVals(CUTS::eDiElec, FILLER::Dipart, _Electron, _Electron);
   fillInfo["FillDiMuon"] =     new FillVals(CUTS::eDiMuon, FILLER::Dipart, _Muon, _Muon);
@@ -836,6 +834,42 @@ void Analyzer::initializeTrigger() {
     }
   }
   BAAM->SetBranchStatus("triggernames", 0);
+}
+
+void Analyzer::initializeMCSelection(vector<string> infiles) {
+    // check if we need to make gen level cuts to cross clean the samples:
+
+  isVSample = false;
+  if(infiles[0].find("DY") != string::npos){
+    isVSample = true;
+    if(infiles[0].find("DYJetsToLL_M-50_HT-") != string::npos){
+      gen_selection["DY_noMass_gt_100"]=true;
+      //gen_selection["DY_noMass_gt_200"]=true;
+    //get the DY1Jet DY2Jet ...
+    }else if(infiles[0].find("JetsToLL_TuneCUETP8M1_13TeV") != string::npos){
+      gen_selection["DY_noMass_gt_100"]=true;
+    }else{
+      //set it to false!!
+      gen_selection["DY_noMass_gt_100"]=false;
+      gen_selection["DY_noMass_gt_200"]=false;
+    }
+    
+    if(infiles[0].find("DYJetsToLL_M-50_TuneCUETP8M1_13TeV") != string::npos){
+      gen_selection["DY_noMass_gt_100"]=true;
+    }else{
+      //set it to false!!
+      gen_selection["DY_noMass_gt_100"]=false;
+      gen_selection["DY_noMass_gt_200"]=false;
+    }
+  }else{
+    //set it to false!!
+    gen_selection["DY_noMass_gt_200"]=false;
+    gen_selection["DY_noMass_gt_100"]=false;
+  }
+
+  if(infiles[0].find("WJets") != string::npos){
+    isVSample = true;
+  }
 }
 
 
@@ -1666,6 +1700,30 @@ double Analyzer::getZBoostWeight(){
 }
 
 
+double Analyzer::getWkfactor(){
+  double kfactor=1.;
+  if(!isWSample)
+    return kfactor;
+  if((active_part->at(CUTS::eGElec)->size() + active_part->at(CUTS::eGTau)->size() + active_part->at(CUTS::eGMuon)->size()) >=1 && (active_part->at(CUTS::eGW)->size() ==1)){
+    //this k-factor is not computed for the low mass W!
+    double wmass=_Gen->p4(active_part->at(CUTS::eGW)->at(0)).M();
+    if(wmass<100){
+      return 1.;
+    }
+    if(active_part->at(CUTS::eGTau)->size()){
+      kfactor=k_ele_h->GetBinContent(k_ele_h->FindBin(wmass));
+    }
+    else if(active_part->at(CUTS::eGMuon)->size()){
+      kfactor=k_mu_h->GetBinContent(k_mu_h->FindBin(wmass));
+    }
+    else if(active_part->at(CUTS::eGElec)->size()){
+      kfactor=k_tau_h->GetBinContent(k_tau_h->FindBin(wmass));
+    }
+  }
+  return kfactor;
+}
+
+
 ////Grabs a list of the groups of histograms to be filled and asked Fill_folder to fill up the histograms
 void Analyzer::fill_histogram() {
   if(distats["Run"].bfind("ApplyGenWeight") && gen_weight == 0.0) return;
@@ -1683,6 +1741,7 @@ void Analyzer::fill_histogram() {
     if(distats["Run"].bfind("ApplyZBoostSF") && isVSample){
       wgt *= getZBoostWeight();
     }
+    wgt *= getWkfactor();
   }else  wgt=1.;
   //backup current weight
   backup_wgt=wgt;
@@ -1697,6 +1756,9 @@ void Analyzer::fill_histogram() {
       fillCuts(true);
       for(auto it: *groups) {
         fill_Folder(it, maxCut, histo, false);
+      }
+      if(!fillCuts(false)) {
+        fill_Tree();
       }
     }else{
       if(syst_names[i].find("weight")!=string::npos){
@@ -2061,6 +2123,58 @@ void Analyzer::fill_Folder(string group, const int max, Histogramer &ihisto, boo
   }
 }
 
+void Analyzer::fill_Tree(){
+  
+  if(1){
+    //do our dirty tree stuff here:
+    int p1=-1;
+    int p2=-1;
+    if(active_part->at(CUTS::eDiTau)->size()==1){
+      p1= active_part->at(CUTS::eDiTau)->at(0) / BIG_NUM;
+      p2= active_part->at(CUTS::eDiTau)->at(0) % BIG_NUM;
+    } else{
+      return;
+    }
+    int j1=-1;
+    int j2=-1;
+    double mass=0;
+    for(auto it : *active_part->at(CUTS::eDiJet)) {
+      int j1tmp= (it) / _Jet->size();
+      int j2tmp= (it) % _Jet->size();
+      if(diParticleMass(_Jet->p4(j1tmp),_Jet->p4(j2tmp),"")>mass){
+        j1=j1tmp;
+        j2=j2tmp;
+        mass=diParticleMass(_Jet->p4(j1tmp),_Jet->p4(j2tmp),"");
+      }
+    }
+    if(p1<0 or p2<0 or j1<0 or j2 <0)
+      return;
+    zBoostTree["tau1_pt"]   = _Tau->pt(p1);
+    zBoostTree["tau1_eta"]  = _Tau->eta(p1);
+    zBoostTree["tau1_phi"]  = _Tau->phi(p1);
+    zBoostTree["tau2_pt"]   = _Tau->pt(p2);
+    zBoostTree["tau2_eta"]  = _Tau->eta(p2);
+    zBoostTree["tau2_phi"]  = _Tau->phi(p2);
+    zBoostTree["tau_mass"]  = diParticleMass(_Tau->p4(p1),_Tau->p4(p2),"");
+    zBoostTree["met"]       = _MET->pt();
+    zBoostTree["mt_tau1"]   = calculateLeptonMetMt(_Tau->p4(p1));
+    zBoostTree["mt_tau2"]   = calculateLeptonMetMt(_Tau->p4(p2));
+    zBoostTree["mt2"]       = _MET->MT2(_Tau->p4(p1),_Tau->p4(p2));
+    zBoostTree["cosDphi1"]  = absnormPhi(_Tau->phi(p1) - _MET->phi());
+    zBoostTree["cosDphi2"]  = absnormPhi(_Tau->phi(p2) - _MET->phi());
+    zBoostTree["jet1_pt"]   = _Jet->pt(j1);
+    zBoostTree["jet1_eta"]  = _Jet->eta(j1);
+    zBoostTree["jet1_phi"]  = _Jet->phi(j1);
+    zBoostTree["jet2_pt"]   = _Jet->pt(j2);
+    zBoostTree["jet2_eta"]  = _Jet->eta(j2);
+    zBoostTree["jet2_phi"]  = _Jet->phi(j2);
+    zBoostTree["jet_mass"]  = mass;
+    zBoostTree["weight"]    = wgt;
+    
+    //put it accidentally in the tree
+    histo.fillTree("TauTauTree");
+  }
+}
 
 void Analyzer::initializePileupInfo(string MCHisto, string DataHisto, string DataHistoName, string MCHistoName) {
 
@@ -2086,6 +2200,28 @@ void Analyzer::initializePileupInfo(string MCHisto, string DataHisto, string Dat
 
 }
 
+void Analyzer::initializeWkfactor(vector<string> infiles) {
+  if(infiles[0].find("WJets") != string::npos){
+    isWSample = true;
+  }else{
+    isWSample=false;
+    return;
+  }
+  //W-jet k-factor Histograms:
+  TFile k_ele("Pileup/k_faktors_ele.root");
+  TFile k_mu("Pileup/k_faktors_mu.root");
+  TFile k_tau("Pileup/k_faktors_tau.root");
+  
+  k_ele_h =dynamic_cast<TH1D*>(k_ele.FindObjectAny("k_fac_m"));
+  k_mu_h  =dynamic_cast<TH1D*>(k_mu.FindObjectAny("k_fac_m"));
+  k_tau_h =dynamic_cast<TH1D*>(k_tau.FindObjectAny("k_fac_m"));
+  
+  k_ele.Close();
+  k_mu.Close();
+  k_tau.Close();
+
+}
+
 ///Normalizes phi to be between -PI and PI
 double normPhi(double phi) {
   static double const TWO_PI = TMath::Pi() * 2;
@@ -2099,4 +2235,3 @@ double normPhi(double phi) {
 double absnormPhi(double phi) {
   return abs(normPhi(phi));
 }
-

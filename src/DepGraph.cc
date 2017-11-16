@@ -1,8 +1,8 @@
 #include "DepGraph.h"
 
-using namespace boost;
+//using namespace boost;
 using namespace std;
-typedef adjacency_list<vecS, vecS, directedS> mygraph;
+typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS> mygraph;
 #define cutint(x) static_cast<int>(x)
 #define intcut(x) static_cast<CUTS>(x)
 
