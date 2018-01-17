@@ -29,7 +29,8 @@ void Systematics::shiftLepton(Lepton& lepton, TLorentzVector recoLep, TLorentzVe
     lepton.addP4Syst(recoLep, syst);
     return;
   }
-  double ratio = (genLep.Pt()*scale) + (recoLep.Pt() - genLep.Pt())*resolution;
+  double ratio = ((genLep.Pt()*scale) + (recoLep.Pt() - genLep.Pt())*resolution)/recoLep.Pt();
+  //cout<<"ratio  "<<ratio<<"  "<<scale<<"  "<<resolution    <<endl;
    //add the shifted part up
    dPx+=recoLep.Px()*(ratio-1);
    dPy+=recoLep.Py()*(ratio-1);
@@ -49,8 +50,10 @@ void Systematics::loadScaleRes(const PartStats& smear, const PartStats& syst, st
   } 
   if(syst_name.find("_Res_")) {
     resolution = syst_name.find("_Up") ? 1 + syst.dmap.at("res") : 1 - syst.dmap.at("res");
+    scale=1;
   } else if(syst_name.find("_Scale_")) {
     scale = syst_name.find("_Up") ? 1+syst.dmap.at("scale") : 1- syst.dmap.at("scale");
+    resolution=1;
   }
 }
 

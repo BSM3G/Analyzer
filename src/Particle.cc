@@ -443,6 +443,7 @@ Taus::Taus(TTree* _BOOM, string filename, vector<string> syst_names) : Lepton(_B
     maxIso.second = maxIso.first;
   }
 
+  SetBranch("Tau_decayModeFinding", decayModeFinding);
   SetBranch("Tau_decayModeFindingNewDMs", decayModeFindingNewDMs);
   SetBranch("Tau_nProngs", nProngs);
   SetBranch("Tau_decayMode", decayMode);

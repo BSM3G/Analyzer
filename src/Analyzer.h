@@ -128,10 +128,6 @@ private:
   double getTauDataMCScaleFactor(int updown);
 
   pair<double, double> getPZeta(const TLorentzVector&, const TLorentzVector&);
-  //double getZBoostWeight(const TLorentzVector&, const TLorentzVector&);
-  //double getZBoostWeight(const TLorentzVector&, const TLorentzVector&);
-  double getWBoostWeight();
-  double getZBoostWeight();
   double getParallelRecoilWeight(const TLorentzVector&, const TLorentzVector&);
   void create_fillInfo();
 
@@ -155,7 +151,7 @@ private:
   TChain* BOOM;
   TTree* BAAM;
   TFile* infoFile;
-  string filespace = "";
+  string filespace = "PartDet/";
   TFile * outfile;
   double hPU[100];
   int version=0;

@@ -565,7 +565,11 @@ bool Analyzer::fillCuts(bool fillCounter) {
 
   for(size_t i = 0; i < cut_order->size(); i++) {
     string cut = cut_order->at(i);
-    if(isData && cut.find("Gen") != string::npos) continue;
+    if(isData && cut.find("Gen") != string::npos){
+      maxCut += 1;
+      continue;
+    }
+    
     int min= cut_info->at(cut).first;
     int max= cut_info->at(cut).second;
     int nparticles = active_part->at(cut_num.at(cut))->size();
@@ -661,6 +665,9 @@ void Analyzer::printCuts() {
 
 bool Analyzer::select_mc_background(){
   //will return true if Z* mass is smaller than 200GeV
+  if(_Gen == nullptr){
+    return true;
+  }
   if(gen_selection["DY_noMass_gt_200"]){
     TLorentzVector lep1;
     TLorentzVector lep2;
@@ -719,7 +726,11 @@ void Analyzer::updateMet(int syst) {
   if(!passCutRange(_MET->pt(), distats["Run"].pmap.at("MetCut"))) return;
   if(distats["Run"].bfind("DiscrByHT") && _MET->HT() < distats["Run"].dmap.at("HtCut")) return;
 
-  active_part->at(CUTS::eMET)->push_back(1);
+  if(syst==0){
+    active_part->at(CUTS::eMET)->push_back(1);
+  }else{
+    syst_parts.at(syst).at(CUTS::eMET)->push_back(1);
+  }
 }
 
 ///////////////////////////////////////////////
@@ -1252,6 +1263,8 @@ void Analyzer::getGoodRecoLeptons(const Lepton& lep, const CUTS ePos, const CUTS
           passCuts = passCuts && (stats.smap.at("ProngType").find("hps") == string::npos || _Tau->decayModeFindingNewDMs->at(i) != 0);
           passCuts = passCuts && passProng(stats.smap.at("ProngType"), _Tau->nProngs->at(i));
         }
+        else if(cut == "decayModeFindingNewDMs") passCuts = passCuts && _Tau->decayModeFindingNewDMs->at(i) != 0;
+        else if(cut == "decayModeFinding") passCuts = passCuts && _Tau->decayModeFinding->at(i) != 0;
               // ----anti-overlap requirements
         else if(cut == "RemoveOverlapWithMuon1s") passCuts = passCuts && !isOverlaping(lvec, *_Muon, CUTS::eRMuon1, stats.dmap.at("Muon1MatchingDeltaR"));
         else if(cut == "RemoveOverlapWithMuon2s") passCuts = passCuts && !isOverlaping(lvec, *_Muon, CUTS::eRMuon2, stats.dmap.at("Muon2MatchingDeltaR"));
@@ -1845,7 +1858,21 @@ void Analyzer::fill_histogram() {
         fill_Folder(it, maxCut, histo, false);
       }
     }else{
-      //cout << "isyst:  " << i << endl;
+      wgt=backup_wgt;
+      if(syst_names[i].find("weight")!=string::npos){
+        if(syst_names[i]=="Tau_weight_Up"){
+          if(distats["Run"].bfind("ApplyTauIDSF")) {
+            wgt/=getTauDataMCScaleFactor(0);
+            wgt *= getTauDataMCScaleFactor(1);
+          }
+        }else if(syst_names[i]=="Tau_weight_Down"){
+          if(distats["Run"].bfind("ApplyTauIDSF")) {
+            wgt/=getTauDataMCScaleFactor(0);
+            wgt *= getTauDataMCScaleFactor(-1);
+          }
+        }
+      }
+>>>>>>> 0611eb8ef419128ee7a3cb59e1c0c003eee0de29
       //get the non particle conditions:
       for(auto itCut : nonParticleCuts){
 	//cout << "itcut: " << itCut << endl;
@@ -1859,6 +1886,7 @@ void Analyzer::fill_histogram() {
         fill_Folder(it, i, syst_histo, true);
 	//cout << "i2: " << i << endl;
       }
+      wgt=backup_wgt;
     }
   }
 }
