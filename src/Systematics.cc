@@ -19,7 +19,7 @@ void Systematics::shiftParticle(Particle& jet, TLorentzVector recJet, double con
    dPx+=recJet.Px()*(ratio-1);
    dPy+=recJet.Py()*(ratio-1);
    //WARNING change the particle content for the particle
-   recJet*=ratio;
+   recJet=recJet*ratio;
    jet.addP4Syst(recJet, syst);
    return;
 }
@@ -49,7 +49,7 @@ void Systematics::loadScaleRes(const PartStats& smear, const PartStats& syst, st
   } 
   if(syst_name.find("_Res_")) {
     resolution = syst_name.find("_Up") ? 1 + syst.dmap.at("res") : 1 - syst.dmap.at("res");
-  } else if(syst_name.find("_Res_")) {
+  } else if(syst_name.find("_Scale_")) {
     scale = syst_name.find("_Up") ? 1+syst.dmap.at("scale") : 1- syst.dmap.at("scale");
   }
 }
