@@ -68,7 +68,6 @@ const unordered_map<string, CUTS> Analyzer::cut_num = {
 };
 
 
-
 //////////////////////////////////////////////////////
 //////////////////PUBLIC FUNCTIONS////////////////////
 //////////////////////////////////////////////////////
@@ -78,6 +77,7 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
   cout << "setup start" << endl;
 
   BOOM= new TChain("TNT/BOOM");
+  infoFile=0;
 
   for( string infile: infiles){
     BOOM->AddFile(infile.c_str());
@@ -97,7 +97,7 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
     trigName[i] = tmps;
   }
 
-  filespace="PartDet";
+  filespace=configFolder;
   filespace+="/";
 
   setupGeneral();
@@ -123,7 +123,7 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
   }else {
     doSystematics=false;
   }
-
+  cout << doSystematics << endl;
   _Electron = new Electron(BOOM, filespace + "Electron_info.in", syst_names);
   _Muon = new Muon(BOOM, filespace + "Muon_info.in", syst_names);
   _Tau = new Taus(BOOM, filespace + "Tau_info.in", syst_names);
@@ -138,10 +138,6 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
     allParticles= {_Electron,_Muon,_Tau,_Jet,_FatJet};
   }
 
-
-  // for(Particle* ipart: allParticles){
-  //   ipart->findExtraCuts();
-  // }
 
   vector<string> cr_variables;
   if(setCR) {
@@ -178,6 +174,7 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
   std::remove(outfile.c_str()); // delete file
   histo = Histogramer(1, filespace+"Hist_entries.in", filespace+"Cuts.in", outfile, isData, cr_variables);
   if(doSystematics)
+    //cout << "syst_names: " << syst_names.size() << endl;
     syst_histo=Histogramer(1, filespace+"Hist_syst_entries.in", filespace+"Cuts.in", outfile, isData, cr_variables,syst_names);
   systematics = Systematics(distats);
   jetScaleRes = JetScaleResolution("Pileup/Summer16_23Sep2016V4_MC_Uncertainty_AK4PFchs.txt", "",  "Pileup/Spring16_25nsV6_MC_PtResolution_AK4PFchs.txt", "Pileup/Spring16_25nsV6_MC_SF_AK4PFchs.txt");
@@ -341,6 +338,48 @@ void Analyzer::setupCR(string var, double val) {
 
 
 
+////destructor
+Analyzer::~Analyzer() {
+  clear_values();
+  delete BOOM;
+  delete _Electron;
+  delete _Muon;
+  delete _Tau;
+  delete _Jet;
+  if(!isData) delete _Gen;
+
+  for(auto pair: fillInfo) {
+    delete pair.second;
+    pair.second=nullptr;
+  }
+
+  for(auto e: Enum<CUTS>()) {
+    delete goodParts[e];
+    goodParts[e]=nullptr;
+  }
+  //for(auto &it: syst_parts) {
+    //for(auto e: Enum<CUTS>()) {
+      //if( it[e] != nullptr) {
+      //if(it.find(e) != it.end()){
+        //delete it[e];
+        //it[e]=nullptr;
+      //}
+      //}
+    //}
+  //}
+  for(auto it: testVec){
+    delete it;
+    it=nullptr;
+  }
+
+  for(int i=0; i < nTrigReq; i++) {
+    delete trigPlace[i];
+    delete trigName[i];
+  }
+
+}
+
+
 ///resets values so analysis can start
 void Analyzer::clear_values() {
 
@@ -354,7 +393,10 @@ void Analyzer::clear_values() {
       it[e]->clear();
     }
   }
-
+  if(infoFile!=BOOM->GetFile()){
+    cout<<"New file!"<<endl;
+    infoFile=BOOM->GetFile();
+  }
   if(version==1 && infoFile!=BOOM->GetFile()){
     cout<<"New file! Will get the trigger info."<<endl;
     infoFile=BOOM->GetFile();
@@ -390,35 +432,36 @@ void Analyzer::preprocess(int event) {
     _Gen->setOrigReco();
     getGoodGen(_Gen->pstats["Gen"]);
     getGoodTauNu();
-    bool checkw = checkforW();  //new7.27.17 See if there's a W with the function checkforW.
-    bool checkz = checkforZ(); //new9.15.17 See if there's a Z with the function checkforZ.
-    if(checkw){
-      double boostw = getWBoostWeight(); //Grab the p_T of the W.
-      if(boostw > 0 && boostw <= 50) {pu_weight *= 1.1192;}  //new7.27.17
-      else if (boostw > 50 && boostw <= 100) {pu_weight *= 1.1034;}   //new7.27.17
-      else if (boostw > 100 && boostw <= 150) {pu_weight *= 1.0675;}  //new7.27.17
-      else if (boostw > 150 && boostw <= 200) {pu_weight *= 1.0637;}  //new7.27.17
-      else if (boostw > 200 && boostw <= 300) {pu_weight *= 1.0242;}  //new7.27.17
-      else if (boostw > 300 && boostw <= 400) {pu_weight *= 0.9453;}  //new7.27.17
-      else if (boostw > 400 && boostw <= 600) {pu_weight *= 0.8579;}  //new7.27.17
-      else if (boostw >= 600) {pu_weight *= 0.7822;}  //new7.27.17
-      else {pu_weight *= 1;}  //new7.27.17
-    }
-    else if (checkz){
-      double boostz = getZBoostWeight(); //Grab the p_T of the Z.
-      if(boostz > 0 && boostz <= 50) {pu_weight *= 1.1192;}  //new9.15.17                                                                                             
-      else if (boostz > 50 && boostz <= 100) {pu_weight *= 1.1034;}   //new9.15.17                                                                                    
-      else if (boostz > 100 && boostz <= 150) {pu_weight *= 1.0675;}  //new9.15.17                                                                                    
-      else if (boostz > 150 && boostz <= 200) {pu_weight *= 1.0637;}  //new9.15.17                                                                                    
-      else if (boostz > 200 && boostz <= 300) {pu_weight *= 1.0242;}  //new9.15.17                                                                                    
-      else if (boostz > 300 && boostz <= 400) {pu_weight *= 0.9453;}  //new9.15.17                                                                                    
-      else if (boostz > 400 && boostz <= 600) {pu_weight *= 0.8579;}  //new9.15.17                                                                                    
-      else if (boostz >= 600) {pu_weight *= 0.7822;}  //new9.15.17                                                                                                    
-      else {pu_weight *= 1;}  //new9.15.17  
-    }
-    else {pu_weight *= 1;}  //new7.27.17
+    //---MY APPLICATION OF BOOST WEIGHTS-------------------------------------------
+  //   bool checkw = checkforW();  //new7.27.17 See if there's a W with the function checkforW.
+  //   bool checkz = checkforZ(); //new9.15.17 See if there's a Z with the function checkforZ.
+  //   if(checkw){
+  //     double boostw = getWBoostWeight(); //Grab the p_T of the W.
+  //     if(boostw > 0 && boostw <= 50) {pu_weight *= 1.1192;}  //new7.27.17
+  //     else if (boostw > 50 && boostw <= 100) {pu_weight *= 1.1034;}   //new7.27.17
+  //     else if (boostw > 100 && boostw <= 150) {pu_weight *= 1.0675;}  //new7.27.17
+  //     else if (boostw > 150 && boostw <= 200) {pu_weight *= 1.0637;}  //new7.27.17
+  //     else if (boostw > 200 && boostw <= 300) {pu_weight *= 1.0242;}  //new7.27.17
+  //     else if (boostw > 300 && boostw <= 400) {pu_weight *= 0.9453;}  //new7.27.17
+  //     else if (boostw > 400 && boostw <= 600) {pu_weight *= 0.8579;}  //new7.27.17
+  //     else if (boostw >= 600) {pu_weight *= 0.7822;}  //new7.27.17
+  //     else {pu_weight *= 1;}  //new7.27.17
+  //   }
+  //   else if (checkz){
+  //     double boostz = getZBoostWeight(); //Grab the p_T of the Z.
+  //     if(boostz > 0 && boostz <= 50) {pu_weight *= 1.1192;}  //new9.15.17
+  //     else if (boostz > 50 && boostz <= 100) {pu_weight *= 1.1034;}   //new9.15.17                                                                                 
+  //     else if (boostz > 100 && boostz <= 150) {pu_weight *= 1.0675;}  //new9.15.17                                                                                 
+  //     else if (boostz > 150 && boostz <= 200) {pu_weight *= 1.0637;}  //new9.15.17                                                                                 
+  //     else if (boostz > 200 && boostz <= 300) {pu_weight *= 1.0242;}  //new9.15.17                                                                                 
+  //     else if (boostz > 300 && boostz <= 400) {pu_weight *= 0.9453;}  //new9.15.17                                                                                 
+  //     else if (boostz > 400 && boostz <= 600) {pu_weight *= 0.8579;}  //new9.15.17                                                                                 
+  //     else if (boostz >= 600) {pu_weight *= 0.7822;}  //new9.15.17           
+  //     else {pu_weight *= 1;}  //new9.15.17  
+  //   }
+  //   else {pu_weight *= 1;}  //new7.27.17
   }
-
+    //---END MY APPLICATION OF BOOST WEIGHTS---------------------------------------
   //////Triggers and Vertices
   active_part->at(CUTS::eRVertex)->resize(bestVertices);
   TriggerCuts(*(trigPlace[0]), *(trigName[0]), CUTS::eRTrig1);
@@ -514,7 +557,7 @@ void Analyzer::getGoodParticles(int syst){
 bool Analyzer::fillCuts(bool fillCounter) {
   const unordered_map<string,pair<int,int> >* cut_info = histo.get_cuts();
   const vector<string>* cut_order = histo.get_cutorder();
-
+ 
   bool prevTrue = true;
   
   maxCut=0;
@@ -997,11 +1040,11 @@ void Analyzer::smearJet(Particle& jet, const CUTS eGenPos, const PartStats& stat
   }
   //add energy scale uncertainty
 
-  
   string systname = syst_names.at(syst);
-
+  //cout << systname << endl;
   for(size_t i=0; i< jet.size(); i++) {
     TLorentzVector jetReco = jet.RecoP4(i);
+
     if(JetMatchesLepton(*_Muon, jetReco, stats.dmap.at("MuonMatchingDeltaR"), CUTS::eGMuon) ||
        JetMatchesLepton(*_Tau, jetReco, stats.dmap.at("TauMatchingDeltaR"), CUTS::eGTau) ||
        JetMatchesLepton(*_Electron, jetReco,stats.dmap.at("ElectronMatchingDeltaR"), CUTS::eGElec)){
@@ -1013,18 +1056,21 @@ void Analyzer::smearJet(Particle& jet, const CUTS eGenPos, const PartStats& stat
     //only apply corrections for jets not for FatJets
 
     TLorentzVector genJet=matchJetToGen(jetReco, jet.pstats["Smear"],eGenPos);
+    //cout << "1: " << genJet.Pt() << endl; //01.05.18
     if(systname=="orig"){
-      sf=jetScaleRes.GetRes(jetReco,genJet, rho, 0);
+      sf= 1.0 ; //jetScaleRes.GetRes(jetReco,genJet, rho, 0); 01.15.18
     }else if(systname=="Jet_Res_Up"){
       sf=jetScaleRes.GetRes(jetReco,genJet, rho, 1);
     }else if(systname=="Jet_Res_Down"){
       sf=jetScaleRes.GetRes(jetReco,genJet, rho, -1);
     }else if(systname=="Jet_Scale_Up"){
-      sf = 1.+ jetScaleRes.GetScale(jetReco, false, +1.);
+      sf = 1.05 ; //1.+ jetScaleRes.GetScale(jetReco, false, +1.); 01.15.18
     }else if(systname=="Jet_Scale_Down"){
-      sf = 1.- jetScaleRes.GetScale(jetReco, false, -1) ;
+      sf = 0.95 ; //1.- jetScaleRes.GetScale(jetReco, false, -1) ; 01.15.18
     }
-    systematics.shiftParticle(jet, jetReco, sf, _MET->systdeltaMEx[syst], _MET->systdeltaMEy[syst], syst);
+
+    systematics.shiftParticle(jet, jetReco, sf, _MET->systdeltaMEx[syst], _MET->systdeltaMEy[syst], syst); 
+
   }
 }
 
@@ -1267,25 +1313,21 @@ void Analyzer::getGoodRecoJets(CUTS ePos, const PartStats& stats, const int syst
     }
     if(passCuts) active_part->at(ePos)->push_back(i);
     i++;
-
   }
 
   //clean up for first and second jet
   //note the leading jet has to be selected fist!
   if(ePos == CUTS::eR1stJet || ePos == CUTS::eR2ndJet) {
-    int potential = -1;
-    double prevPt = -1;
-    for(auto leadit : *active_part->at(ePos)) {
-      if(((ePos == CUTS::eR2ndJet && (leadit) != leadIndex) || ePos == CUTS::eR1stJet) && _Jet->pt(leadit) > prevPt) {
-        potential = leadit;
-        prevPt = _Jet->pt(leadit);
-      }
+    vector<pair<double, int> > ptIndexVector;
+    for(auto it : *active_part->at(ePos)) {
+      ptIndexVector.push_back(make_pair(_Jet->pt(it),it));
     }
-    active_part->at(ePos)->clear();
-    active_part->at(ePos)->push_back(potential);
-    if(ePos == CUTS::eR1stJet) leadIndex = active_part->at(CUTS::eR1stJet)->at(0);
+    sort(ptIndexVector.begin(),ptIndexVector.end());
+    if(ePos == CUTS::eR1stJet && ptIndexVector.size()>0)
+      active_part->at(ePos)->push_back(ptIndexVector.back().second);
+    if(ePos == CUTS::eR2ndJet && ptIndexVector.size()>1)
+      active_part->at(ePos)->push_back(ptIndexVector.at(ptIndexVector.size()-2).second);
   }
-
 }
 
 
@@ -1393,7 +1435,7 @@ void Analyzer::VBFTopologyCut(const PartStats& stats, const int syst) {
     }
   }
 
-  if(active_part->at(CUTS::eR1stJet)->at(0) == -1 || active_part->at(CUTS::eR2ndJet)->at(0) == -1) return;
+  if(active_part->at(CUTS::eR1stJet)->size()==0 || active_part->at(CUTS::eR2ndJet)->size()==0) return;
 
   TLorentzVector ljet1 = _Jet->p4(active_part->at(CUTS::eR1stJet)->at(0));
   TLorentzVector ljet2 = _Jet->p4(active_part->at(CUTS::eR2ndJet)->at(0));
@@ -1415,8 +1457,8 @@ void Analyzer::VBFTopologyCut(const PartStats& stats, const int syst) {
       double alpha = (dijet.M() > 0) ? ljet2.Pt() / dijet.M() : -1;
       passCuts = passCuts && passCutRange(alpha, stats.pmap.at("AlphaCut"));
     }
-    else if(cut == "DiscrByDphi1") passCuts = passCuts && passCutRange(abs(dphi1), stats.pmap.at("DPhi1Cut"));
-    else if(cut == "DiscrByDphi2") passCuts = passCuts && passCutRange(abs(dphi2), stats.pmap.at("DPhi2Cut"));
+    else if(cut == "DiscrByDphi1") passCuts = passCuts && passCutRange(abs(dphi1), stats.pmap.at("Dphi1Cut"));
+    else if(cut == "DiscrByDphi2") passCuts = passCuts && passCutRange(abs(dphi2), stats.pmap.at("Dphi2Cut"));
 
     else cout << "cut: " << cut << " not listed" << endl;
   }
@@ -1789,8 +1831,8 @@ void Analyzer::fill_histogram() {
   }else  wgt=1.;
   //backup current weight
   backup_wgt=wgt;
-
-  for(size_t i = 0; i < syst_names.size(); i++) {
+  cout << "syst_names size: " << syst_names.size() << endl;
+  for(size_t i = 0; i < syst_names.size(); i++) { 
     for(Particle* ipart: allParticles) ipart->setCurrentP(i);
     _MET->setCurrentP(i);
     active_part =&syst_parts.at(i);
@@ -1799,17 +1841,23 @@ void Analyzer::fill_histogram() {
       active_part = &goodParts;
       fillCuts(true);
       for(auto it: *groups) {
+	cout << "it1: " << it << endl;
         fill_Folder(it, maxCut, histo, false);
       }
     }else{
+      //cout << "isyst:  " << i << endl;
       //get the non particle conditions:
       for(auto itCut : nonParticleCuts){
+	//cout << "itcut: " << itCut << endl;
         active_part->at(itCut)=goodParts.at(itCut);
       }
       //cout<<"________________"<<i<<endl;
       if(!fillCuts(false)) continue;
-      for(auto it: *syst_histo.get_groups()) {
+      cout << "i: " << i << endl;
+      for(auto it: *syst_histo.get_groups()) { //categories in the hist info. files
+	cout << "it2: " << it << endl;//cout << "isyst: " << i << endl;
         fill_Folder(it, i, syst_histo, true);
+	//cout << "i2: " << i << endl;
       }
     }
   }
@@ -1846,7 +1894,7 @@ void Analyzer::fill_Folder(string group, const int max, Histogramer &ihisto, boo
     histAddVal(bestVertices, "NVertices");
   } else if(!isData && group == "FillGen") {
 
-    //int nhadtau = 0;
+    int nhadtau = 0;
     TLorentzVector genVec;
     int i = 0;
     for(vec_iter it=active_part->at(CUTS::eGTau)->begin(); it!=active_part->at(CUTS::eGTau)->end(); it++, i++) {
@@ -1913,7 +1961,11 @@ void Analyzer::fill_Folder(string group, const int max, Histogramer &ihisto, boo
           //cout<<"mass  leptons "<<mass<<endl;
           break;
         }else{
-          lep1= _Gen->p4(i);
+          //cout<<_Gen->size()<<"   "<<igen<<endl;
+          //if(_Gen->size()>_Gen->cur_P.size()){
+           //_Gen->init();
+          //}
+          lep1= _Gen->RecoP4(i);
         }
       }
     }
@@ -1938,6 +1990,7 @@ void Analyzer::fill_Folder(string group, const int max, Histogramer &ihisto, boo
         histAddVal(_Tau->nProngs->at(it), "NumSignalTracks");
         histAddVal(_Tau->charge(it), "Charge");
         histAddVal(_Tau->leadChargedCandPt->at(it), "SeedTrackPt");
+	//histAddVal(calculateLeptonMetMt(part->p4(it)), "MetMt");
       }
       if(part->type != PType::Jet) {
         histAddVal(calculateLeptonMetMt(part->p4(it)), "MetMt");
@@ -1978,12 +2031,12 @@ void Analyzer::fill_Folder(string group, const int max, Histogramer &ihisto, boo
     histAddVal(_MET->phi(), "MetPhi");
 
   } else if(group == "FillLeadingJet" && active_part->at(CUTS::eSusyCom)->size() == 0) {
-
-    if(active_part->at(CUTS::eR1stJet)->at(0) != -1) {
+    
+    if(active_part->at(CUTS::eR1stJet)->size()>0) {
       histAddVal(_Jet->p4(active_part->at(CUTS::eR1stJet)->at(0)).Pt(), "FirstPt");
       histAddVal(_Jet->p4(active_part->at(CUTS::eR1stJet)->at(0)).Eta(), "FirstEta");
     }
-    if(active_part->at(CUTS::eR2ndJet)->at(0) != -1) {
+    if(active_part->at(CUTS::eR2ndJet)->size()>0) {
       histAddVal(_Jet->p4(active_part->at(CUTS::eR2ndJet)->at(0)).Pt(), "SecondPt");
       histAddVal(_Jet->p4(active_part->at(CUTS::eR2ndJet)->at(0)).Eta(), "SecondEta");
     }
@@ -2100,12 +2153,14 @@ void Analyzer::fill_Folder(string group, const int max, Histogramer &ihisto, boo
       double add_px = (part1.Pt() * cos(part1.Phi())) + (part2.Pt() * cos(part2.Phi()));
       double add_py = (part1.Pt() * sin(part1.Phi())) + (part2.Pt() * sin(part2.Phi()));
 //    TLorentzVector add_p = part1 + part2;
-      double mag_addp2 = pow(add_px, 2) + pow(add_py, 2);
+      //double mag_addp2 = pow(add_px, 2) + pow(add_py, 2);
       TLorentzVector boost_pt;     //initialized vector for x and y-components of the muon momenta
       boost_pt.SetPxPyPzE(add_px, add_py, 0, 0);
       //double booster = boost_pt.Pt();                                                                                                   
-      TLorentzVector u_t;     //initialized vector for recoil                                                                                                         
-      u_t = -1 * (boost_pt + theMETVector);     //Recoil is the negative sum of the Z Pt and MET.
+      TLorentzVector u_t;     //initialized vector for recoil                                                                                                
+      TLorentzVector met_pt;
+      met_pt.SetPxPyPzE(_MET->px(), _MET->py(), 0, 0);
+      u_t = -1 * (boost_pt + met_pt);     //Recoil is the negative sum of the Z Pt and MET.
       TVector2 boost_pt2;     //two-component boost (Pt) vector for easy manipulations                                                                                 
       boost_pt2.Set(add_px, add_py);     //put the muons' x and y-momenta in it
       TVector2 boost_unitpar;     //two-component vector for the unit vector parallel to the Z Pt
