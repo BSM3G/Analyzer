@@ -1,0 +1,599 @@
+/////////////////// Histograms //////////////
+
+//// This file lists all of the histograms that will be made in the output root file
+//// 
+//// The Histograms, to facilitate ease of adding similar values, are organized into "FillGroups" that can be 
+//// turned on or off.  These fill groups are implimented in the Analyzer in the fill_folders function, so any
+//// new histograms that need to be added will be done in that function.  
+//// Histograms are flexible, so if you don't want a histogram, it can be commented out.  If the analyzer has
+//// a histogram implimented, but it is not listed in this file, then the code will not complain.  
+//// The Histograms themselves are implimented similarly to root histos.  First give the name, the number of bins
+//// then the low and high value for the histogram.
+//// ie
+//// <Histogram name>  <N bins> <min> <max>
+//// For 2D histograms, you simply add another set of bins, min, and max for the y-axis.
+//// If you are trying to put a new histogram into the analyzer, NOTE: the analyzer uses the histogram name, but
+//// without the particle names and/or with names replaced with "Part1" or "Part2".  This is to facilitate similar
+//// particles using similar histograms.
+//// ie
+//// Muon1Pt ==> Pt
+//// DiMuon_Muon1MetMt ==> Part1MetMt
+
+///////////////////////////////////////////////
+
+
+FillRun 1
+Events        3   0.    3.
+NVertices   100   0.  100.
+
+//------------------------------------------------//
+
+FillGen 1
+
+NGenTau            20   0.       20.
+NGenHadTau         20   0.       20.
+GenTauEnergy      5000   0.     5000.
+GenTauPt          5000   0.     5000.
+GenTauEta          72  -3.6      +3.6
+GenTauPhi          36  -3.15     +3.15
+GenHadTauPt       5000   0.     5000.
+GenHadTauEta       72  -3.6      +3.6
+//NGenMuon           20   0.       20.
+//GenMuonEnergy     200   0.      500.
+//GenMuonPt         200   0.      500.
+//GenMuonEta         72  -3.6      +3.6
+//GenMuonPhi         36  -3.15     +3.15
+GenDiTauMass      10000   0.    10000.
+
+//////GenZprimeMass    100 0. 10000.      NOT IMPLIMENTED
+//////GenZprimeStatusCode     100 0. 100.
+//////GenTauStatusCode     100 0. 100.
+
+//------------------------------------------------//
+
+FillTau1 1
+
+NTau1                    20   0.      20.
+Tau1Energy             5000   0.    5000.
+Tau1Pt                 5000   0.    5000.
+Tau1Eta                 100  -5.0     +5.0
+FirstLeadingTau1Pt     5000   0.    5000.
+FirstLeadingTau1Eta     144  -7.2     +7.2
+SecondLeadingTau1Pt     5000   0.    5000.
+SecondLeadingTau1Eta     144  -7.2     +7.2
+Tau1Phi                  36  -3.15    +3.15
+Tau1NumSignalTracks      10   0       10
+Tau1SeedTrackPt        5000   0.    5000.
+Tau1Charge               10  -5.       5.
+
+FillTau2 1
+
+NTau2                    20   0.      20.
+Tau2Energy             5000   0.    5000.
+Tau2Pt                 5000   0.    5000.
+Tau2Eta                 100  -5.0     +5.0
+FirstLeadingTau2Pt     5000   0.    5000.
+FirstLeadingTau2Eta     144  -7.2     +7.2
+SecondLeadingTau2Pt     5000   0.    5000.
+SecondLeadingTau2Eta     144  -7.2     +7.2
+Tau2Phi                  36  -3.15    +3.15
+Tau2NumSignalTracks      10   0       10
+Tau2SeedTrackPt        5000   0.    5000.
+Tau2Charge               10  -5.       5.
+
+//------------------------------------------------//
+
+FillElectron1 0
+
+NElectron1                   20   0.      20.
+Electron1Energy            2000   0.    5000.
+Electron1Pt                2000   0.    5000.
+Electron1Eta                 72  -3.6     +3.6
+FirstLeadingElectron1Pt     400   0.    1000.
+FirstLeadingElectron1Eta    144  -7.2     +7.2
+Electron1Phi                 36  -3.15    +3.15
+Electron1MetMt              100   0      500
+
+FillElectron2 0
+
+NElectron2                   20   0.      20.
+Electron2Energy            2000   0.    5000.
+Electron2Pt                2000   0.    5000.
+Electron2Eta                 72  -3.6     +3.6
+FirstLeadingElectron2Pt     400   0.    1000.
+FirstLeadingElectron2Eta    144  -7.2     +7.2
+Electron2Phi                 36  -3.15    +3.15
+Electron2MetMt              100   0      500
+
+//------------------------------------------------//
+
+FillMuon1 0
+
+NMuon1                   20   0.      20.
+Muon1Energy            2000   0.    5000.
+Muon1Pt                2000   0.    5000.
+Muon1Eta                 72  -3.6     +3.6
+FirstLeadingMuon1Pt     400   0.    1000.
+FirstLeadingMuon1Eta    144  -7.2     +7.2
+Muon1Phi                 36  -3.15    +3.15
+Muon1MetMt              100   0      500
+
+FillMuon2 0
+
+NMuon2                   20   0.      20.
+Muon2Energy            2000   0.    5000.
+Muon2Pt                2000   0.    5000.
+Muon2Eta                 72  -3.6     +3.6
+FirstLeadingMuon2Pt     400   0.    1000.
+FirstLeadingMuon2Eta    144  -7.2     +7.2
+Muon2Phi                 36  -3.15    +3.15
+Muon2MetMt              100   0      500
+
+//------------------------------------------------//
+
+FillJet1 1
+
+NJet1         20   0.    20.
+Jet1Energy   200   0.   500.
+Jet1Pt       200   0.   500.
+Jet1Eta      100  -5.0   +5.0
+Jet1Phi      144  -6.3   +6.3
+
+FillJet2 0
+
+NJet2         20   0.    20.
+Jet2Energy   200   0.   500.
+Jet2Pt       200   0.   500.
+Jet2Eta      100  -5.0   +5.0
+Jet2Phi      144  -6.3   +6.3
+
+FillBJet 1
+
+NBJet         20   0.     20.
+BJetEnergy   200   0.    500.
+BJetPt       200   0.    500.
+BJetEta       72  -3.6    +3.6
+BJetPhi       36  -3.15   +3.15
+
+FillCentralJet 0
+
+NCentralJet      20   0.    20.
+CentralJetPt    200   0.   500.
+CentralJetEta   100  -5.0   +5.0
+
+
+FillWJet 1
+
+NWJet      20   0.    20.
+WJetPt    200   0.   500.
+WJetEta   100  -5.0   +5.0
+WJetPrunedMass   300  0   300
+WJetSoftDropMass   300  0   300
+WJettau1   100  0   1
+WJettau2   100  0   1
+WJettau2Overtau1   100  0   1
+
+//------------------------------------------------//
+
+FillMetCuts 1
+
+Met                1000  0  1000
+MHT                500  0  5000
+HT                 500  0  5000
+Meff               500  0  5000
+
+//------------------------------------------------//
+
+FillLeadingJet 0
+
+FirstLeadingJetPt     200   0.   1000.
+SecondLeadingJetPt    200   0.   1000.
+FirstLeadingJetEta    100  -5.      5.
+SecondLeadingJetEta   100  -5.      5.
+
+LeadingJetMass       1000   0    5000
+LeadSublDijetDphi      72   0      +3.15
+LeadingJetPt         1000   0    5000
+LeadingJetDeltaR      200   0      10.
+LeadingJetDeltaEta    200   0      10.
+R1                     60   0       6
+R2                     60   0       6
+Dphi1                  72  -6.3    +6.3
+Dphi2MHT               72  -6.3    +6.3
+Dphi1MHT               72  -6.3    +6.3
+Dphi2                  72  -6.3    +6.3
+Alpha                  50   0       2
+MetDiJetDeltaPhi       72   0      +3.15
+
+Dphi1VsDphi2                  72  -6.3    +6.3  72  -6.3  +6.3
+MetVsDiJetDeltaPhiLeadSubl   100   0    1000.   72   0    +3.15
+DeltaEtaVsDeltaPhiLeadSubl   200   0      10.   72   0    +3.15
+
+
+//------------------------------------------------//
+
+FillDiJet 0
+
+DiJetDeltaR           200   0    10.
+DiJetDeltaEta         200   0    10.
+DiJetDeltaPhi          72   0    +3.15
+DiJetMass            1000   0  5000
+DiJetPt              1000   0  5000
+
+LargestDiJetMass        1000   0  5000
+LargestDiJetPt          1000   0  5000
+LargestDiJetEtaProduct     4  -2     2
+LargestDiJetDeltaR       200   0    10.
+LargestMassDiJetDeltaEta     200   0    10.
+
+//------------------------------------------------//
+
+FillDiMuon 0
+
+DiMuon_Muon1DiJetDeltaPhi       72     0       +3.15
+DiMuon_Muon2DiJetDeltaPhi       72     0       +3.15
+DiMuon_Muon1IsZdecay             2     0        2
+DiMuon_Muon2IsZdecay             2     0        2
+DiMuonDeltaR                   100     0        5.
+DiMuonDeltaPtDivSumPt          100    -5        5.
+DiMuonDeltaPt                  100     0     1000
+DiMuon_Muon1MetMt              100     0      500
+DiMuon_Muon2MetMt              100     0      500
+DiMuonOSLS                      20   -10       10
+DiMuonCosDphi                  220    -1.1      1.1
+DiMuonCosDphi_DeltaPtAndMet    220    -1.1      1.1
+DiMuon_Muon1MetDeltaPhi         72     0       +3.15
+DiMuon_Muon2MetDeltaPhi         72     0       +3.15
+DiMuonPZeta                    200  -100      100
+DiMuonPZetaVis                 100     0      100
+DiMuonZeta1D                   150  -300      300
+DiMuonNotReconstructableMass   600     0     1500
+DiMuonReconstructableMass      600     0     1500
+
+Muon1PtVsMuon2Pt                 100  0  500     100     0    500
+DiMuonZeta2D                     100  0  100     200  -100    100
+Muon1MetDeltaPhiVsDiMuonCosDphi   72  0   +3.15  220    -1.1    1.1
+
+//------------------------------------------------//
+
+FillDiTau 1
+
+DiTau_Tau1DiJetDeltaPhi          72     0    +3.15
+DiTau_Tau2DiJetDeltaPhi          72     0    +3.15
+DiTauDeltaR                     100     0     5.
+DiTauDeltaPtDivSumPt            100    -5     5.
+DiTauDeltaPt                    100     0  1000
+DiTau_Tau1MetMt                 100     0   500
+DiTau_Tau2MetMt                 100     0   500
+DiTauOSLS                        20   -10    10
+DiTauCosDphi                    220    -1.1   1.1
+DiTau_Tau1CosDphiPtandMet       220    -1.1   1.1
+DiTau_Tau2CosDphiPtandMet       220    -1.1   1.1
+DiTauCosDphi_DeltaPtAndMet      220    -1.1      1.1
+DiTau_Tau1MetDeltaPhi            72     0    +3.15
+DiTau_Tau2MetDeltaPhi            72     0    +3.15
+DiTauPZeta                      200  -100   100
+DiTauPZetaVis                   100     0   100
+DiTauZeta1D                     150  -300   300
+DiTauNotReconstructableMass     200     0  5000
+DiTauReconstructableMass       5000     0  5000
+DiTauInvariantMass	       5000     0  5000
+DiTauSumOfPt		       5000     0  5000
+DiTauDiJetReconstructableMass   200     0  5000
+Tau1MetDeltaPhiVsDiTauCosDphi    72     0    +3.15  220    -1.1   1.1
+DiTauZeta2D                     100     0   100     200  -100   100
+Tau1PtVsTau2Pt                  100     0   500     100     0   500
+
+//------------------------------------------------//
+
+FillMuon1Tau1 0
+
+Muon1Tau1_Tau1DiJetDeltaPhi           72     0       +3.15
+Muon1Tau1_Muon1DiJetDeltaPhi          72     0       +3.15
+Muon1Tau1_Muon1IsZdecay                2     0        2.
+Muon1Tau1DeltaR                      100     0        5.
+Muon1Tau1DeltaPtDivSumPt             100    -5        5.
+Muon1Tau1DeltaPt                     100     0     1000
+Muon1Tau1_Muon1MetMt                 100     0      500
+Muon1Tau1_Tau1MetMt                  100     0      500
+Muon1Tau1OSLS                         20   -10       10
+Muon1Tau1CosDphi                     220    -1.1      1.1
+Muon1Tau1CosDphi_DeltaPtAndMet       220    -1.1      1.1
+Muon1Tau1_Muon1MetDeltaPhi            72     0       +3.15
+Muon1Tau1_Tau1MetDeltaPhi             72     0       +3.15
+Muon1Tau1NotReconstructableMass      600     0     1500
+Muon1Tau1ReconstructableMass         600     0     1500
+Muon1Tau1PZeta                       200  -100      100
+Muon1Tau1PZetaVis                    100     0      100
+Muon1Tau1Zeta1D                      150  -300      300
+Muon1Tau1DiJetReconstructableMass    100     0     5000
+Muon1PtVsTau1Pt                      100     0      500      100     0     500
+Muon1Tau1Zeta2D                      100     0      100      200  -100     100
+Muon1MetDeltaPhiVsMuon1Tau1CosDphi    72     0       +3.15   220    -1.1     1.1
+
+FillMuon1Tau2 0
+
+Muon1Tau2_Tau2DiJetDeltaPhi           72     0       +3.15
+Muon1Tau2_Muon1DiJetDeltaPhi          72     0       +3.15
+Muon1Tau2_Muon1IsZdecay                2     0        2.
+Muon1Tau2DeltaR                      100     0        5.
+Muon1Tau2DeltaPtDivSumPt             100    -5        5.
+Muon1Tau2DeltaPt                     100     0     1000
+Muon1Tau2_Muon1MetMt                 100     0      500
+Muon1Tau2_Tau2MetMt                  100     0      500
+Muon1Tau2OSLS                         20   -10       10
+Muon1Tau2CosDphi                     220    -1.1      1.1
+Muon1Tau2CosDphi_DeltaPtAndMet       220    -1.1      1.1
+Muon1Tau2_Muon1MetDeltaPhi            72     0       +3.15
+Muon1Tau2_Tau2MetDeltaPhi             72     0       +3.15
+Muon1Tau2NotReconstructableMass      600     0     1500
+Muon1Tau2ReconstructableMass         600     0     1500
+Muon1Tau2PZeta                       200  -100      100
+Muon1Tau2PZetaVis                    100     0      100
+Muon1Tau2Zeta1D                      150  -300      300
+Muon1Tau2DiJetReconstructableMass    100     0     5000
+Muon1PtVsTau2Pt                      100     0      500      100     0     500
+Muon1Tau2Zeta2D                      100     0      100      200  -100     100
+Muon1MetDeltaPhiVsMuon1Tau2CosDphi    72     0       +3.15   220    -1.1     1.1
+
+FillMuon2Tau1 0
+
+Muon2Tau1_Tau1DiJetDeltaPhi           72     0       +3.15
+Muon2Tau1_Muon2DiJetDeltaPhi          72     0       +3.15
+Muon2Tau1_Muon2IsZdecay                2     0        2.
+Muon2Tau1DeltaR                      100     0        5.
+Muon2Tau1DeltaPtDivSumPt             100    -5        5.
+Muon2Tau1DeltaPt                     100     0     1000
+Muon2Tau1_Muon2MetMt                 100     0      500
+Muon2Tau1_Tau1MetMt                  100     0      500
+Muon2Tau1OSLS                         20   -10       10
+Muon2Tau1CosDphi                     220    -1.1      1.1
+Muon2Tau1CosDphi_DeltaPtAndMet       220    -1.1      1.1
+Muon2Tau1_Muon2MetDeltaPhi            72     0       +3.15
+Muon2Tau1_Tau1MetDeltaPhi             72     0       +3.15
+Muon2Tau1NotReconstructableMass      600     0     1500
+Muon2Tau1ReconstructableMass         600     0     1500
+Muon2Tau1PZeta                       200  -100      100
+Muon2Tau1PZetaVis                    100     0      100
+Muon2Tau1Zeta1D                      150  -300      300
+Muon2Tau1DiJetReconstructableMass    100     0     5000
+Muon2PtVsTau1Pt                      100     0      500      100     0     500
+Muon2Tau1Zeta2D                      100     0      100      200  -100     100
+Muon2MetDeltaPhiVsMuon2Tau1CosDphi    72     0       +3.15   220    -1.1     1.1
+
+
+FillMuon2Tau2 0
+
+Muon2Tau2_Tau2DiJetDeltaPhi           72     0       +3.15
+Muon2Tau2_Muon2DiJetDeltaPhi          72     0       +3.15
+Muon2Tau2_Muon2IsZdecay                2     0        2.
+Muon2Tau2DeltaR                      100     0        5.
+Muon2Tau2DeltaPtDivSumPt             100    -5        5.
+Muon2Tau2DeltaPt                     100     0     1000
+Muon2Tau2_Muon2MetMt                 100     0      500
+Muon2Tau2_Tau2MetMt                  100     0      500
+Muon2Tau2OSLS                         20   -10       10
+Muon2Tau2CosDphi                     220    -1.1      1.1
+Muon2Tau2CosDphi_DeltaPtAndMet       220    -1.1      1.1
+Muon2Tau2_Muon2MetDeltaPhi            72     0       +3.15
+Muon2Tau2_Tau2MetDeltaPhi             72     0       +3.15
+Muon2Tau2NotReconstructableMass      600     0     1500
+Muon2Tau2ReconstructableMass         600     0     1500
+Muon2Tau2PZeta                       200  -100      100
+Muon2Tau2PZetaVis                    100     0      100
+Muon2Tau2Zeta1D                      150  -300      300
+Muon2Tau2DiJetReconstructableMass    100     0     5000
+Muon2PtVsTau2Pt                      100     0      500      100     0     500
+Muon2Tau2Zeta2D                      100     0      100      200  -100     100
+Muon2MetDeltaPhiVsMuon2Tau2CosDphi    72     0       +3.15   220    -1.1     1.1
+
+//------------------------------------------------//
+
+FillElectron1Tau1 0
+
+Electron1Tau1_Tau1DiJetDeltaPhi           72     0       +3.15
+Electron1Tau1_Electron1DiJetDeltaPhi          72     0       +3.15
+Electron1Tau1_Electron1IsZdecay                2     0        2.
+Electron1Tau1DeltaR                      100     0        5.
+Electron1Tau1DeltaPtDivSumPt             100    -5        5.
+Electron1Tau1DeltaPt                     100     0     1000
+Electron1Tau1_Electron1MetMt                 100     0      500
+Electron1Tau1_Tau1MetMt                  100     0      500
+Electron1Tau1OSLS                         20   -10       10
+Electron1Tau1CosDphi                     220    -1.1      1.1
+Electron1Tau1CosDphi_DeltaPtAndMet       220    -1.1      1.1
+Electron1Tau1_Electron1MetDeltaPhi            72     0       +3.15
+Electron1Tau1_Tau1MetDeltaPhi             72     0       +3.15
+Electron1Tau1NotReconstructableMass      600     0     1500
+Electron1Tau1ReconstructableMass         600     0     1500
+Electron1Tau1PZeta                       200  -100      100
+Electron1Tau1PZetaVis                    100     0      100
+Electron1Tau1Zeta1D                      150  -300      300
+Electron1Tau1DiJetReconstructableMass    100     0     5000
+Electron1PtVsTau1Pt                      100     0      500      100     0     500
+Electron1Tau1Zeta2D                      100     0      100      200  -100     100
+Electron1MetDeltaPhiVsElectron1Tau1CosDphi    72     0       +3.15   220    -1.1     1.1
+
+FillElectron1Tau2 0
+
+Electron1Tau2_Tau2DiJetDeltaPhi           72     0       +3.15
+Electron1Tau2_Electron1DiJetDeltaPhi          72     0       +3.15
+Electron1Tau2_Electron1IsZdecay                2     0        2.
+Electron1Tau2DeltaR                      100     0        5.
+Electron1Tau2DeltaPtDivSumPt             100    -5        5.
+Electron1Tau2DeltaPt                     100     0     1000
+Electron1Tau2_Electron1MetMt                 100     0      500
+Electron1Tau2_Tau2MetMt                  100     0      500
+Electron1Tau2OSLS                         20   -10       10
+Electron1Tau2CosDphi                     220    -1.1      1.1
+Electron1Tau2CosDphi_DeltaPtAndMet       220    -1.1      1.1
+Electron1Tau2_Electron1MetDeltaPhi            72     0       +3.15
+Electron1Tau2_Tau2MetDeltaPhi             72     0       +3.15
+Electron1Tau2NotReconstructableMass      600     0     1500
+Electron1Tau2ReconstructableMass         600     0     1500
+Electron1Tau2PZeta                       200  -100      100
+Electron1Tau2PZetaVis                    100     0      100
+Electron1Tau2Zeta1D                      150  -300      300
+Electron1Tau2DiJetReconstructableMass    100     0     5000
+Electron1PtVsTau2Pt                      100     0      500      100     0     500
+Electron1Tau2Zeta2D                      100     0      100      200  -100     100
+Electron1MetDeltaPhiVsElectron1Tau2CosDphi    72     0       +3.15   220    -1.1     1.1
+
+FillElectron2Tau1 0
+
+Electron2Tau1_Tau1DiJetDeltaPhi           72     0       +3.15
+Electron2Tau1_Electron2DiJetDeltaPhi          72     0       +3.15
+Electron2Tau1_Electron2IsZdecay                2     0        2.
+Electron2Tau1DeltaR                      100     0        5.
+Electron2Tau1DeltaPtDivSumPt             100    -5        5.
+Electron2Tau1DeltaPt                     100     0     1000
+Electron2Tau1_Electron2MetMt                 100     0      500
+Electron2Tau1_Tau1MetMt                  100     0      500
+Electron2Tau1OSLS                         20   -10       10
+Electron2Tau1CosDphi                     220    -1.1      1.1
+Electron2Tau1CosDphi_DeltaPtAndMet       220    -1.1      1.1
+Electron2Tau1_Electron2MetDeltaPhi            72     0       +3.15
+Electron2Tau1_Tau1MetDeltaPhi             72     0       +3.15
+Electron2Tau1NotReconstructableMass      600     0     1500
+Electron2Tau1ReconstructableMass         600     0     1500
+Electron2Tau1PZeta                       200  -100      100
+Electron2Tau1PZetaVis                    100     0      100
+Electron2Tau1Zeta1D                      150  -300      300
+Electron2Tau1DiJetReconstructableMass    100     0     5000
+Electron2PtVsTau1Pt                      100     0      500      100     0     500
+Electron2Tau1Zeta2D                      100     0      100      200  -100     100
+Electron2MetDeltaPhiVsElectron2Tau1CosDphi    72     0       +3.15   220    -1.1     1.1
+
+FillElectron2Tau2 0
+
+Electron2Tau2_Tau2DiJetDeltaPhi           72     0       +3.15
+Electron2Tau2_Electron2DiJetDeltaPhi          72     0       +3.15
+Electron2Tau2_Electron2IsZdecay                2     0        2.
+Electron2Tau2DeltaR                      100     0        5.
+Electron2Tau2DeltaPtDivSumPt             100    -5        5.
+Electron2Tau2DeltaPt                     100     0     1000
+Electron2Tau2_Electron2MetMt                 100     0      500
+Electron2Tau2_Tau2MetMt                  100     0      500
+Electron2Tau2OSLS                         20   -10       10
+Electron2Tau2CosDphi                     220    -1.1      1.1
+Electron2Tau2CosDphi_DeltaPtAndMet       220    -1.1      1.1
+Electron2Tau2_Electron2MetDeltaPhi            72     0       +3.15
+Electron2Tau2_Tau2MetDeltaPhi             72     0       +3.15
+Electron2Tau2NotReconstructableMass      600     0     1500
+Electron2Tau2ReconstructableMass         600     0     1500
+Electron2Tau2PZeta                       200  -100      100
+Electron2Tau2PZetaVis                    100     0      100
+Electron2Tau2Zeta1D                      150  -300      300
+Electron2Tau2DiJetReconstructableMass    100     0     5000
+Electron2PtVsTau2Pt                      100     0      500      100     0     500
+Electron2Tau2Zeta2D                      100     0      100      200  -100     100
+Electron2MetDeltaPhiVsElectron2Tau2CosDphi    72     0       +3.15   220    -1.1     1.1
+
+//------------------------------------------------//
+
+FillMuon1Electron1 0
+
+Muon1Electron1_Electron1DiJetDeltaPhi           72     0       +3.15
+Muon1Electron1_Muon1DiJetDeltaPhi          72     0       +3.15
+Muon1Electron1_Muon1IsZdecay                2     0        2.
+Muon1Electron1_Electron1IsZdecay                2     0        2.
+Muon1Electron1DeltaR                      100     0        5.
+Muon1Electron1DeltaPtDivSumPt             100    -5        5.
+Muon1Electron1DeltaPt                     100     0     1000
+Muon1Electron1_Muon1MetMt                 100     0      500
+Muon1Electron1_Electron1MetMt                  100     0      500
+Muon1Electron1OSLS                         20   -10       10
+Muon1Electron1CosDphi                     220    -1.1      1.1
+Muon1Electron1CosDphi_DeltaPtAndMet       220    -1.1      1.1
+Muon1Electron1_Muon1MetDeltaPhi            72     0       +3.15
+Muon1Electron1_Electron1MetDeltaPhi             72     0       +3.15
+Muon1Electron1NotReconstructableMass      600     0     1500
+Muon1Electron1ReconstructableMass         600     0     1500
+Muon1Electron1PZeta                       200  -100      100
+Muon1Electron1PZetaVis                    100     0      100
+Muon1Electron1Zeta1D                      150  -300      300
+Muon1Electron1DiJetReconstructableMass    100     0     5000
+Muon1PtVsElectron1Pt                      100     0      500      100     0     500
+Muon1Electron1Zeta2D                      100     0      100      200  -100     100
+Muon1MetDeltaPhiVsMuon1Electron1CosDphi    72     0       +3.15   220    -1.1     1.1
+
+FillMuon1Electron2 0
+
+Muon1Electron2_Electron2DiJetDeltaPhi           72     0       +3.15
+Muon1Electron2_Muon1DiJetDeltaPhi          72     0       +3.15
+Muon1Electron2_Muon1IsZdecay                2     0        2.
+Muon1Electron2_Electron2IsZdecay                2     0        2.
+Muon1Electron2DeltaR                      100     0        5.
+Muon1Electron2DeltaPtDivSumPt             100    -5        5.
+Muon1Electron2DeltaPt                     100     0     1000
+Muon1Electron2_Muon1MetMt                 100     0      500
+Muon1Electron2_Electron2MetMt                  100     0      500
+Muon1Electron2OSLS                         20   -10       10
+Muon1Electron2CosDphi                     220    -1.1      1.1
+Muon1Electron2CosDphi_DeltaPtAndMet       220    -1.1      1.1
+Muon1Electron2_Muon1MetDeltaPhi            72     0       +3.15
+Muon1Electron2_Electron2MetDeltaPhi             72     0       +3.15
+Muon1Electron2NotReconstructableMass      600     0     1500
+Muon1Electron2ReconstructableMass         600     0     1500
+Muon1Electron2PZeta                       200  -100      100
+Muon1Electron2PZetaVis                    100     0      100
+Muon1Electron2Zeta1D                      150  -300      300
+Muon1Electron2DiJetReconstructableMass    100     0     5000
+Muon1PtVsElectron2Pt                      100     0      500      100     0     500
+Muon1Electron2Zeta2D                      100     0      100      200  -100     100
+Muon1MetDeltaPhiVsMuon1Electron2CosDphi    72     0       +3.15   220    -1.1     1.1
+
+FillMuon2Electron1 0
+
+Muon2Electron1_Electron1DiJetDeltaPhi           72     0       +3.15
+Muon2Electron1_Muon2DiJetDeltaPhi          72     0       +3.15
+Muon2Electron1_Muon2IsZdecay                2     0        2.
+Muon2Electron1_Electron1IsZdecay                2     0        2.
+Muon2Electron1DeltaR                      100     0        5.
+Muon2Electron1DeltaPtDivSumPt             100    -5        5.
+Muon2Electron1DeltaPt                     100     0     1000
+Muon2Electron1_Muon2MetMt                 100     0      500
+Muon2Electron1_Electron1MetMt                  100     0      500
+Muon2Electron1OSLS                         20   -10       10
+Muon2Electron1CosDphi                     220    -1.1      1.1
+Muon2Electron1CosDphi_DeltaPtAndMet       220    -1.1      1.1
+Muon2Electron1_Muon2MetDeltaPhi            72     0       +3.15
+Muon2Electron1_Electron1MetDeltaPhi             72     0       +3.15
+Muon2Electron1NotReconstructableMass      600     0     1500
+Muon2Electron1ReconstructableMass         600     0     1500
+Muon2Electron1PZeta                       200  -100      100
+Muon2Electron1PZetaVis                    100     0      100
+Muon2Electron1Zeta1D                      150  -300      300
+Muon2Electron1DiJetReconstructableMass    100     0     5000
+Muon2PtVsElectron1Pt                      100     0      500      100     0     500
+Muon2Electron1Zeta2D                      100     0      100      200  -100     100
+Muon2MetDeltaPhiVsMuon2Electron1CosDphi    72     0       +3.15   220    -1.1     1.1
+
+
+FillMuon2Electron2 0
+
+Muon2Electron2_Electron2DiJetDeltaPhi           72     0       +3.15
+Muon2Electron2_Muon2DiJetDeltaPhi          72     0       +3.15
+Muon2Electron2_Muon2IsZdecay                2     0        2.
+Muon2Electron2_Electron2IsZdecay                2     0        2.
+Muon2Electron2DeltaR                      100     0        5.
+Muon2Electron2DeltaPtDivSumPt             100    -5        5.
+Muon2Electron2DeltaPt                     100     0     1000
+Muon2Electron2_Muon2MetMt                 100     0      500
+Muon2Electron2_Electron2MetMt                  100     0      500
+Muon2Electron2OSLS                         20   -10       10
+Muon2Electron2CosDphi                     220    -1.1      1.1
+Muon2Electron2CosDphi_DeltaPtAndMet       220    -1.1      1.1
+Muon2Electron2_Muon2MetDeltaPhi            72     0       +3.15
+Muon2Electron2_Electron2MetDeltaPhi             72     0       +3.15
+Muon2Electron2NotReconstructableMass      600     0     1500
+Muon2Electron2ReconstructableMass         600     0     1500
+Muon2Electron2PZeta                       200  -100      100
+Muon2Electron2PZetaVis                    100     0      100
+Muon2Electron2Zeta1D                      150  -300      300
+Muon2Electron2DiJetReconstructableMass    100     0     5000
+Muon2PtVsElectron2Pt                      100     0      500      100     0     500
+Muon2Electron2Zeta2D                      100     0      100      200  -100     100
+Muon2MetDeltaPhiVsMuon2Electron2CosDphi    72     0       +3.15   220    -1.1     1.1
+
+//------------------------------------------------//

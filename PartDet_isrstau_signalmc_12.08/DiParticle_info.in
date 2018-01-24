@@ -1,0 +1,100 @@
+#######################################
+              DiTau
+#######################################
+
+DiscrByDeltaR  true
+DeltaRCut      0.3
+
+DiscrByOSLSType  None	#### OS or LS
+DiscrByCosDphi	 false
+CosDphiCut 	 -1.00   -0.80
+
+DiscrByMassReco  true
+HowCalculateMassReco  VectorSumofVisProductsAndMet       ###VectorSumOfVisProductsAndMet   or    CollinearApprox 
+MassCut          0.0   10000.0
+
+DiscrByCDFzeta2D          false
+PZetaCutCoefficient       1.0
+PZetaVisCutCoefficient    -3.1
+CDFzeta2DCutValue         -50.0    1000
+
+DiscrByDeltaPtDivSumPt     false
+DeltaPtDivSumPtCutValue    0.4  1.0
+DiscrByDeltaPt 		   false
+DeltaPtCutValue 	   50.0   1000.0
+
+######################################
+               DiMuon
+#####################################
+
+DiscrByDeltaR  1
+DeltaRCut      0.3 
+
+DiscrByOSLSType  OS
+DiscrByCosDphi	 0
+CosDphiCut 	 -1.00   -0.95
+
+DiscrByCosDphi_DeltaPtAndMet   false
+CosDphi_DeltaPtMetCut  0.8  1.0
+
+DiscrByMassReco  true
+HowCalculateMassReco NONE     ###VectorSumOfVisProductsAndMet   or    CollinearApprox 
+MassCut          80.0   100.0
+
+DiscrByCDFzeta2D          0
+PZetaCutCoefficient       1.0
+PZetaVisCutCoefficient    -3.1
+CDFzeta2DCutValue         -50.0    1000
+
+DiscrByDeltaPtDivSumPt     0
+DeltaPtDivSumPtCutValue    0.1  1.0
+DiscrByDeltaPt 		   true
+DeltaPtCutValue 	   30.0   9999.0
+
+########################################
+               DiElectron
+#######################################
+
+DiscrByDeltaR  1
+DeltaRCut      0.3 
+
+DiscrByOSLSType  No
+DiscrByCosDphi	 true
+CosDphiCut 	 -1.00   -0.95
+
+DiscrByCosDphi_DeltaPtAndMet   false
+CosDphi_DeltaPtMetCut  0.8  1.0
+
+DiscrByMassReco  0
+HowCalculateMassReco None     ###VectorSumOfVisProductsAndMet   or    CollinearApprox 
+MassCut          150.0   10000.0
+
+DiscrByCDFzeta2D          false
+PZetaCutCoefficient       1.0
+PZetaVisCutCoefficient    -3.1
+CDFzeta2DCutValue         -50.0    9999.0
+
+DiscrByDeltaPtDivSumPt     0
+DeltaPtDivSumPtCutValue    0.1  1.0
+DiscrByDeltaPt 		   0
+DeltaPtCutValue 	   30.0   1000.0
+
+
+#########################################
+               DiJet
+#####################################
+
+DiscrByDeltaR true
+DeltaRCut 0.3
+
+DiscrByDeltaEta      false
+DeltaEtaCut         4.2  9999.0
+DiscrByDeltaPhi      false
+DeltaPhiCut         0    9999.0
+DiscrByOSEta true
+DiscrByCosDphi false
+CosDphiCut  -1.00 -0.80
+
+DiscrByMassReco false
+MassCut 500.0 9999.0
+

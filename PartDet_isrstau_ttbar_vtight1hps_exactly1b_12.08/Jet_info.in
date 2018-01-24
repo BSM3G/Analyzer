@@ -1,0 +1,160 @@
+########################################
+	        Smear
+#######################################
+
+SmearTheJet 0
+JetEnergyScaleOffset 0.3
+
+MuonMatchingDeltaR  0.3
+ElectronMatchingDeltaR  0.3
+TauMatchingDeltaR  0.3
+
+
+
+########################################
+               Jet1
+#######################################
+
+EtaCut 0. 2.5
+PtCut 30.0
+
+ApplyLooseID 1
+
+RemoveOverlapWithMuon1s 0
+RemoveOverlapWithMuon2s 0
+Muon1MatchingDeltaR  0.3
+Muon2MatchingDeltaR  0.1
+
+RemoveOverlapWithElectron1s 0
+RemoveOverlapWithElectron2s 0
+Electron1MatchingDeltaR  0.3
+Electron2MatchingDeltaR  0.3
+
+RemoveOverlapWithTau1s 1
+RemoveOverlapWithTau2s 0
+Tau1MatchingDeltaR  0.3
+Tau2MatchingDeltaR 0.1
+
+########################################
+	        Jet2
+#######################################
+
+EtaCut 0. 2.5
+PtCut 30.0
+ApplyLooseID 1
+
+RemoveOverlapWithMuon1s 0
+RemoveOverlapWithMuon2s 0
+Muon1MatchingDeltaR  0.3
+Muon2MatchingDeltaR  0.3
+
+RemoveOverlapWithElectron1s 0
+RemoveOverlapWithElectron2s 0
+Electron1MatchingDeltaR  0.1
+Electron2MatchingDeltaR  0.1
+
+RemoveOverlapWithTau1s 1
+RemoveOverlapWithTau2s 1
+Tau1MatchingDeltaR  0.3
+Tau2MatchingDeltaR 0.3
+
+####################################
+          CentralJet
+###################################
+
+ApplyLooseID 1
+PtCut 30.0
+
+RemoveOverlapWithMuon1s 0
+RemoveOverlapWithMuon2s 0
+Muon1MatchingDeltaR 0.3
+Muon2MatchingDeltaR 0.3
+
+RemoveOverlapWithElectron1s 0
+RemoveOverlapWithElectron2s 0
+Electron1MatchingDeltaR 0.3
+Electron2MatchingDeltaR 0.3
+
+RemoveOverlapWithTau1s 1
+RemoveOverlapWithTau2s 0
+Tau1MatchingDeltaR 0.3
+Tau2MatchingDeltaR 0.3
+
+####################################
+	 FirstLeadingJet
+###################################
+
+DoDiscrByThisJet 1
+
+ApplyLooseID 1
+EtaCut 0.0 2.5
+PtCut 100.0
+
+RemoveOverlapWithMuon1s 0 
+RemoveOverlapWithMuon2s 0
+Muon1MatchingDeltaR 0.3 
+Muon2MatchingDeltaR 0.3
+
+RemoveOverlapWithElectron1s 0
+RemoveOverlapWithElectron2s 0
+Electron1MatchingDeltaR 0.3
+Electron2MatchingDeltaR 0.3
+
+RemoveOverlapWithTau1s 1
+RemoveOverlapWithTau2s 0
+Tau1MatchingDeltaR 0.3
+Tau2MatchingDeltaR 0.3
+
+####################################
+	 SecondLeadingJet
+###################################
+
+DoDiscrByThisJet 1
+
+EtaCut 0.0 2.5
+PtCut 30.0
+ApplyLooseID 1       
+
+RemoveOverlapWithMuon1s 0
+RemoveOverlapWithMuon2s 0
+Muon1MatchingDeltaR 0.3
+Muon2MatchingDeltaR 0.3
+
+RemoveOverlapWithElectron1s 0
+RemoveOverlapWithElectron2s 0
+Electron1MatchingDeltaR 0.3
+Electron2MatchingDeltaR 0.3
+
+RemoveOverlapWithTau1s 1
+RemoveOverlapWithTau2s 0
+Tau1MatchingDeltaR 0.3
+Tau2MatchingDeltaR 0.3
+
+###################################
+    	     BJet
+##################################
+
+EtaCut 0.0 3.5
+PtCut 30.0
+
+RemoveOverlapWithMuon1s 1
+RemoveOverlapWithMuon2s 1
+Muon1MatchingDeltaR 0.3
+Muon2MatchingDeltaR 0.3
+
+RemoveOverlapWithElectron1s 0
+RemoveOverlapWithElectron2s 0
+Electron1MatchingDeltaR 0.3
+Electron2MatchingDeltaR 0.3
+
+RemoveOverlapWithTau1s 1
+RemoveOverlapWithTau2s 0
+Tau1MatchingDeltaR 0.3
+Tau2MatchingDeltaR 0.3
+
+ApplyJetBTagging 1
+JetBTaggingCut  0.8484
+MatchBToGen     0
+UseBtagSF       0
+
+

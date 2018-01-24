@@ -1,0 +1,45 @@
+###################################
+                Run
+####################################
+
+CalculatePUSystematics true
+DataHistos data_pileup_2016_69p2.root  
+MCHistos mc_pileup_Summer16.root
+DataPUHistName pileup
+MCPUHistName pileup
+
+ApplyTauIDSF false
+UsePileUpWeight true
+ApplyZBoostSF true
+
+isData false
+ApplyGenWeight  true
+
+///------Triggers-----///
+
+Trigger1FirstRequirement HLT_PFMETNoMu120_PFMHTNoMu120_IDTight
+Trigger1SecondRequirement HLT_PFMETNoMu120_PFMHTNoMu120_IDTight 
+
+Trigger2FirstRequirement HLT_DoubleMediumIsoPFTau35_Trk1_eta2p1_Reg_v
+Trigger2SecondRequirement HLT_DoubleMediumIsoPFTau40_Trk1_eta2p1_Reg_v
+
+///---Treat Muon as Neutrino---///
+
+TreatMuonsAsNeutrinos 0
+TreatMuonsAsTaus 0
+
+///-----MET cuts------///
+
+DiscrByMet true
+MetCut 230.0 10000.0
+
+DiscrByMHT false
+MhtCut 50.0
+DiscrByHT false
+HtCut 30.0
+
+JetPtForMhtAndHt 30.0        
+JetEtaForMhtAndHt 5.0        
+ApplyJetLooseIDforMhtAndHt true
+
+

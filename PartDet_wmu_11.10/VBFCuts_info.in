@@ -1,0 +1,29 @@
+##################################
+           VBFSUSY
+##################################
+
+DiscrByMass false
+MassCut 500.0 10000.0
+
+DiscrByPt true
+PtCut 0 10000.0
+DiscrByDeltaEta false
+DeltaEtaCut 4.0 10000.0
+DiscrByDeltaPhi false
+DeltaPhiCut 1.3. 10000.0
+
+DiscrByOSEta 0
+
+DiscrByR1 0
+R1Cut 0.85 999.0
+DiscrByR2 false  
+R2Cut 0.0 3.6
+DiscrByAlpha false
+AlphaCut 0.5 5.0
+
+DiscrByDphi1 false
+Dphi1Cut 0.2 999.9
+DiscrByDphi2 true
+Dphi2Cut 0.6 9999.5
+
+

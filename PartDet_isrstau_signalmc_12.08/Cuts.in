@@ -1,0 +1,71 @@
+////////////////////// Cuts ///////////////
+
+//// This file gives all of the multiplicity cuts that are made in the code.  The order of the cuts can be changed
+//// 
+//// The first variable is the name that corresponds to the CUTS enum value that holds the number of "good" 
+//// particles that correspond to the name.  These are defined in the map called "cut_num" in src/Analyzer.cc
+//// The next two numbers are the minimum and maximum number of particles allowed.  -1 corresponds to infinity
+//// ie
+//// NParticleA 2 -1
+//// means the particle "ParticleA" must have at least 2 particles.
+//// The cuts are applied cumulatively, so after a cut, only events that passed that cut will be considered in the
+//// next cut
+
+//// If you want to see the histograms after a specific multiplicity cut, you can make that cut into a folder by
+//// putting *** before the cut name.  The folder will hold histograms that were filled AFTER the cut is applied
+//// ie
+//// ***NParticleB 0 0
+//// means a folder with histograms filled after the cut of have exactly 0 of "ParticleB"
+
+///////////////////////////////////////////
+
+
+NGenTop		0  -1
+NGenElectron 	0  -1
+NGenMuon	0  -1
+NGenZ		0  -1
+NGenW		0  -1
+NGenHiggs	0  -1
+NGenTau		0  -1
+
+***NRecoVertex        1   -1
+***NRecoTriggers1     0   -1           ///only 0 or 1
+NRecoMuon2	      0   -1
+NRecoElectron2	      0   -1
+***NRecoTau1	      1    1
+NRecoElectron1        0   -1
+NRecoMuon1	      0   -1
+NRecoTau2	      0   -1
+NRecoJet2	      0   -1
+NRecoCentralJet	      0   -1
+NRecoTriggers2	      0   -1           ///only 0 or 1
+NRecoSecondLeadingJet 0   -1    ///only 0 or 1
+
+
+NDiMuonCombinations	   0   -1
+NDiElectronCombinations	   0   -1
+NDiTauCombinations	   0   -1
+***NRecoJet1	      	   1   -1
+***NRecoFirstLeadingJet    1   -1     ///only 0 or 1
+***NRecoBJet	      	   0   	0
+NDiJetCombinations	   0   -1
+NLeadJetCombinations       0   -1   ///only 0 or 1
+			   
+NMuon1Tau1Combinations        0   -1
+NMuon1Tau2Combinations 	      0   -1
+NMuon2Tau1Combinations 	      0   -1
+NMuon2Tau2Combinations 	      0   -1
+NElectron1Tau1Combinations    0   -1
+NElectron1Tau2Combinations    0   -1
+NElectron2Tau1Combinations    0   -1
+NElectron2Tau2Combinations    0   -1
+NMuon1Electron1Combinations   0   -1
+NMuon1Electron2Combinations   0   -1
+NMuon2Electron1Combinations   0   -1
+NMuon2Electron2Combinations   0   -1
+
+
+***METCut			   1   -1
+
+
+

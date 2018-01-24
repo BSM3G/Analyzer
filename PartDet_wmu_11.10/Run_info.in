@@ -1,0 +1,51 @@
+####################################
+                Run
+####################################
+
+CalculatePUSystematics true
+DataHistos data_75bins_69200.root 
+///PU2016data_6p2ifb.root
+MCHistos MC_75bins.root 
+///PU2016MC.root
+DataPUHistName pileup 
+///NVertices_0
+MCPUHistName pileup 
+///NVertices_0
+
+ApplyTauIDSF false
+UsePileUpWeight false #for pileup efficiency set to false on a second run 11.08.17
+ApplyZBoostSF true
+
+isData false
+ApplyGenWeight  true
+
+///------Triggers-----///
+
+Trigger1FirstRequirement HLT_IsoMu24_
+///HLT_DoubleMediumIsoPFTau35_Trk1_eta2p1
+Trigger1SecondRequirement HLT_IsoMu24_ 
+///HLT_DoubleMediumIsoPFTau35_Trk1_eta2p1
+
+Trigger2FirstRequirement HLT_DoubleMediumIsoPFTau35_Trk1_eta2p1_Reg_v
+Trigger2SecondRequirement HLT_DoubleMediumIsoPFTau40_Trk1_eta2p1_Reg_v
+
+///---Treat Muon as Neutrino---///
+
+TreatMuonsAsNeutrinos 0
+TreatMuonsAsTaus 0
+
+///-----MET cuts------///
+
+DiscrByMet true
+MetCut 50.0 10000.0
+
+DiscrByMHT false
+MhtCut 50.0
+DiscrByHT false
+HtCut 30.0
+
+JetPtForMhtAndHt 30.0        
+JetEtaForMhtAndHt 5.0        
+ApplyJetLooseIDforMhtAndHt true
+
+

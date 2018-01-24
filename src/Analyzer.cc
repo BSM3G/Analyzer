@@ -123,7 +123,6 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
   }else {
     doSystematics=false;
   }
-  cout << doSystematics << endl;
   _Electron = new Electron(BOOM, filespace + "Electron_info.in", syst_names);
   _Muon = new Muon(BOOM, filespace + "Muon_info.in", syst_names);
   _Tau = new Taus(BOOM, filespace + "Tau_info.in", syst_names);
@@ -174,7 +173,6 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
   std::remove(outfile.c_str()); // delete file
   histo = Histogramer(1, filespace+"Hist_entries.in", filespace+"Cuts.in", outfile, isData, cr_variables);
   if(doSystematics)
-    //cout << "syst_names: " << syst_names.size() << endl;
     syst_histo=Histogramer(1, filespace+"Hist_syst_entries.in", filespace+"Cuts.in", outfile, isData, cr_variables,syst_names);
   systematics = Systematics(distats);
   jetScaleRes = JetScaleResolution("Pileup/Summer16_23Sep2016V4_MC_Uncertainty_AK4PFchs.txt", "",  "Pileup/Spring16_25nsV6_MC_PtResolution_AK4PFchs.txt", "Pileup/Spring16_25nsV6_MC_SF_AK4PFchs.txt");
@@ -346,6 +344,7 @@ Analyzer::~Analyzer() {
   delete _Muon;
   delete _Tau;
   delete _Jet;
+ 
   if(!isData) delete _Gen;
 
   for(auto pair: fillInfo) {
@@ -417,7 +416,7 @@ void Analyzer::preprocess(int event) {
     ipart->init();
   }
   _MET->init();
-
+  
   active_part = &goodParts;
   if(!select_mc_background()){
     //we will put nothing in good particles
@@ -473,17 +472,16 @@ void Analyzer::preprocess(int event) {
     smearLepton(*_Electron, CUTS::eGElec, _Electron->pstats["Smear"], distats["Electron_systematics"], i);
     smearLepton(*_Muon, CUTS::eGMuon, _Muon->pstats["Smear"], distats["Muon_systematics"], i);
     smearLepton(*_Tau, CUTS::eGTau, _Tau->pstats["Smear"], distats["Tau_systematics"], i);
-
     smearJet(*_Jet,CUTS::eGJet,_Jet->pstats["Smear"], i);
     smearJet(*_FatJet,CUTS::eGJet,_FatJet->pstats["Smear"], i);
-    updateMet(i);
+    updateMet(i); 
     
   }
   
   for(size_t i=0; i < syst_names.size(); i++) {
     string systname = syst_names.at(i);
     for( auto part: allParticles) part->setCurrentP(i);
-    _MET->setCurrentP(i);
+    _MET->setCurrentP(i); 
     getGoodParticles(i);
   }
   active_part = &goodParts;
@@ -561,8 +559,7 @@ bool Analyzer::fillCuts(bool fillCounter) {
   bool prevTrue = true;
   
   maxCut=0;
-  //  cout << active_part << endl;;
-
+ 
   for(size_t i = 0; i < cut_order->size(); i++) {
     string cut = cut_order->at(i);
     if(isData && cut.find("Gen") != string::npos){
@@ -1052,7 +1049,7 @@ void Analyzer::smearJet(Particle& jet, const CUTS eGenPos, const PartStats& stat
   //add energy scale uncertainty
 
   string systname = syst_names.at(syst);
-  //cout << systname << endl;
+ 
   for(size_t i=0; i< jet.size(); i++) {
     TLorentzVector jetReco = jet.RecoP4(i);
 
@@ -1067,21 +1064,20 @@ void Analyzer::smearJet(Particle& jet, const CUTS eGenPos, const PartStats& stat
     //only apply corrections for jets not for FatJets
 
     TLorentzVector genJet=matchJetToGen(jetReco, jet.pstats["Smear"],eGenPos);
-    //cout << "1: " << genJet.Pt() << endl; //01.05.18
+
     if(systname=="orig"){
-      sf= 1.0 ; //jetScaleRes.GetRes(jetReco,genJet, rho, 0); 01.15.18
+      sf= jetScaleRes.GetRes(jetReco,genJet, rho, 0);
     }else if(systname=="Jet_Res_Up"){
       sf=jetScaleRes.GetRes(jetReco,genJet, rho, 1);
     }else if(systname=="Jet_Res_Down"){
       sf=jetScaleRes.GetRes(jetReco,genJet, rho, -1);
     }else if(systname=="Jet_Scale_Up"){
-      sf = 1.05 ; //1.+ jetScaleRes.GetScale(jetReco, false, +1.); 01.15.18
+      sf = 1.+ jetScaleRes.GetScale(jetReco, false, +1.);
     }else if(systname=="Jet_Scale_Down"){
-      sf = 0.95 ; //1.- jetScaleRes.GetScale(jetReco, false, -1) ; 01.15.18
+      sf = 1.- jetScaleRes.GetScale(jetReco, false, -1);
     }
-
+   
     systematics.shiftParticle(jet, jetReco, sf, _MET->systdeltaMEx[syst], _MET->systdeltaMEy[syst], syst); 
-
   }
 }
 
@@ -1844,7 +1840,7 @@ void Analyzer::fill_histogram() {
   }else  wgt=1.;
   //backup current weight
   backup_wgt=wgt;
-  cout << "syst_names size: " << syst_names.size() << endl;
+
   for(size_t i = 0; i < syst_names.size(); i++) { 
     for(Particle* ipart: allParticles) ipart->setCurrentP(i);
     _MET->setCurrentP(i);
@@ -1854,7 +1850,7 @@ void Analyzer::fill_histogram() {
       active_part = &goodParts;
       fillCuts(true);
       for(auto it: *groups) {
-	cout << "it1: " << it << endl;
+	//cout << "it1: " << it << endl;
         fill_Folder(it, maxCut, histo, false);
       }
     }else{
@@ -1872,19 +1868,16 @@ void Analyzer::fill_histogram() {
           }
         }
       }
->>>>>>> 0611eb8ef419128ee7a3cb59e1c0c003eee0de29
+
       //get the non particle conditions:
       for(auto itCut : nonParticleCuts){
-	//cout << "itcut: " << itCut << endl;
-        active_part->at(itCut)=goodParts.at(itCut);
+	active_part->at(itCut)=goodParts.at(itCut);
       }
       //cout<<"________________"<<i<<endl;
       if(!fillCuts(false)) continue;
-      cout << "i: " << i << endl;
       for(auto it: *syst_histo.get_groups()) { //categories in the hist info. files
-	cout << "it2: " << it << endl;//cout << "isyst: " << i << endl;
-        fill_Folder(it, i, syst_histo, true);
-	//cout << "i2: " << i << endl;
+	//cout << "it2: " << it << endl;//
+       	fill_Folder(it, i, syst_histo, true);
       }
       wgt=backup_wgt;
     }
