@@ -8,9 +8,10 @@
 #include <cassert>
 #include <TH1.h>
 #include <TH2.h>
+#include <TEfficiency.h>
 #include <TFile.h>
 
-using namespace std;
+//using namespace std;
 
 /*
 DataPiece: parent class for Piece1D and Piece2D.  Use this polymorphism to make
@@ -18,10 +19,10 @@ using the Databinner a little easier
 
 Contains the public functions for the DataBinner to use:
 
-write_histogram(vector<string>& folders, TFiles* outfile)
+write_histogram(std::vector<std::string>& folders, TFiles* outfile)
 Writes the histograms stored in the DataPiece into each folder of the outfile.
 
-input: folder -- a vector with the names of the folders so the programs can cd into the correct folder
+input: folder -- a std::vector with the names of the folders so the programs can cd into the correct folder
 in the outfile
 outfile -- TFile that the histograms are written out to
 
@@ -35,18 +36,19 @@ weight -- weight given to the value.
 */
 class DataPiece {
 protected:
-  const string name;
+  const std::string name;
 
 public:
 
   bool is1D;
-  DataPiece(string _name, int _Nfold) : name(_name), is1D(true) {
+  DataPiece(std::string _name, int _Nfold) : name(_name), is1D(true) {
     TH1::AddDirectory(false);  
   };
   virtual ~DataPiece() {};
-  virtual void write_histogram(vector<string>&, TFile*) {};
+  virtual void write_histogram(std::vector<std::string>&, TFile*, std::string subfolder) {};
   virtual void bin(int, double, double) {};
   virtual void bin(int, double, double, double) {};
+  virtual void bin(int, double, bool) {};
 
 };
 
@@ -56,12 +58,12 @@ private:
   const double begin, end;
   const int bins;
 
-  vector<TH1D> histograms;
+  std::vector<TH1D> histograms;
 
 
 public:
-  Piece1D(string, int, double, double, int);
-  void write_histogram(vector<string>&, TFile*);
+  Piece1D(std::string, int, double, double, int);
+  void write_histogram(std::vector<std::string>&, TFile*, std::string subfolder);
   void bin(int, double, double);
 };
 
@@ -71,23 +73,38 @@ private:
   const double beginx, endx, beginy, endy;
   const int binx, biny;
 
-  vector<TH2D> histograms;
+  std::vector<TH2D> histograms;
 
 public:
-  Piece2D(string, int, double, double, int, double, double, int);
-  void write_histogram(vector<string>&, TFile*);
+  Piece2D(std::string, int, double, double, int, double, double, int);
+  void write_histogram(std::vector<std::string>&, TFile*, std::string subfolder);
   void bin(int, double, double, double);
+};
+
+
+class Piece1DEff : public DataPiece {
+private:
+  const double begin, end;
+  const int bins;
+  std::vector<TEfficiency> histograms;
+  bool wroteOutput;
+
+
+public:
+  Piece1DEff(std::string, int, double, double, int);
+  void write_histogram(std::vector<std::string>&, TFile*);
+  void bin(int, double, bool);
 };
 
 
 /*
   DataBinner: Class that is a container for the DataPieces.  All of its functions are simply to interface with individual
-       DataPieces.  Uses an unordered_map because they have O(1) look up time (as opposed to regular map with O(logn)), but 
+       DataPieces.  Uses an std::unordered_map because they have O(1) look up time (as opposed to regular std::map with O(logn)), but 
        have to include the order to write out.  Speed lost in this, but since write out happens only once, speed should
        be gained here
 
-  AddPoint(string shortname, int 
-  Add_Hist(string shortname, string fullname, int bin, double left, double right, int Nfolder)
+  AddPoint(std::string shortname, int 
+  Add_Hist(std::string shortname, std::string fullname, int bin, double left, double right, int Nfolder)
        Function takes in parameters for a histogram and makes a corrisponding DataPiece for this histogram.  
        Two versions for Piece1D and Piece2D
 
@@ -113,16 +130,18 @@ public:
   DataBinner& operator=(DataBinner&&);
   ~DataBinner();
 
-  void AddPoint(string,int, double, double);
-  void AddPoint(string,int, double, double, double);
-  void Add_Hist(string, string, int, double, double, int);
-  void Add_Hist(string, string, int, double, double, int, double, double, int);
-  void write_histogram(TFile*, vector<string>&);
+  void AddPoint(std::string,int, double, double);
+  void AddPoint(std::string,int, double, double, double);
+  void Add_Hist(std::string, std::string, int, double, double, int);
+  void Add_Hist(std::string, std::string, int, double, double, int, double, double, int);
+  void Add_Hist(std::string, int, double, double, int);
+  void AddEff(std::string, int, double, bool);
+  void write_histogram(TFile*, std::vector<std::string>&, std::string);
   void setSingleFill() {fillSingle = true;}
 
 private:
-  unordered_map<string, DataPiece*> datamap;
-  vector<string> order;
+  std::unordered_map<std::string, DataPiece*> datamap;
+  std::vector<std::string> order;
   bool fillSingle = false;
 };
 

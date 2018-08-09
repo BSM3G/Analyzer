@@ -19,18 +19,18 @@ bool CRTester::partPassBoth(Analyzer* analyzer) {
     ePart2 = CUTS::eRTau2;
     diffsize = analyzer->_Tau->size();
   }
-  vector<int>* part1 = analyzer->goodParts[ePart1];
-  vector<int>* part2 = analyzer->goodParts[ePart2];
-  vector<int> diff(diffsize);
+  std::vector<int>* part1 = analyzer->goodParts[ePart1];
+  std::vector<int>* part2 = analyzer->goodParts[ePart2];
+  std::vector<int> diff(diffsize);
 
-  vector<int>::iterator it = set_symmetric_difference(part1->begin(), part1->end(), part2->begin(), part2->end(), diff.begin());
+  std::vector<int>::iterator it = set_symmetric_difference(part1->begin(), part1->end(), part2->begin(), part2->end(), diff.begin());
   diff.resize(it - diff.begin());
 
   return (diff.size() == 0);
 }
 
 
-CRTester::CRTester(FillVals* _info, string var, double val, string _name) : info(_info), variable(var), cutVal(val), partName(_name) {}
+CRTester::CRTester(FillVals* _info, std::string var, double val, std::string _name) : info(_info), variable(var), cutVal(val), partName(_name) {}
 
 bool CRTester::test(Analyzer* analyzer) {
 

@@ -17,14 +17,14 @@ class Systematics {
 
 public:
   Systematics();
-  Systematics(std::unordered_map<string, PartStats> const &distats);
+  Systematics(std::unordered_map<std::string, PartStats> const &distats);
   ~Systematics();
 
   void init();
 
   void shiftParticle(Particle& jet, TLorentzVector recJet, double const& ratio, double& dPx, double& dPy, int syst);
   void shiftLepton(Lepton& lepton, TLorentzVector recoLep, TLorentzVector genLep, double& dPx, double& dPy, int syst);
-  void loadScaleRes(const PartStats& smear, const PartStats& syst, string syst_name);
+  void loadScaleRes(const PartStats& smear, const PartStats& syst, std::string syst_name);
 
 private:
   double scale;

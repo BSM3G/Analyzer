@@ -1,7 +1,7 @@
 #ifndef _FILL_INFO_H_
 #define _FILL_INFO_H_
 
-enum class FILLER { Single, Dipart, None };
+enum class FILLER { Single, Dipart, Dilepjet, None };
 
 struct FillVals {
   CUTS ePos;

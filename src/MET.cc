@@ -4,7 +4,7 @@
 #define SetBranch(name, variable) BOOM->SetBranchStatus(name, true);  BOOM->SetBranchAddress(name, &variable);
 
 //particle is a objet that stores multiple versions of the particle candidates
-Met::Met(TTree* _BOOM, string _GenName,  vector<string> _syst_names) : BOOM(_BOOM), GenName(_GenName), syst_names(_syst_names) {
+Met::Met(TTree* _BOOM, std::string _GenName,  std::vector<std::string> _syst_names, double _MT2mass) : BOOM(_BOOM), GenName(_GenName), syst_names(_syst_names), MT2mass(_MT2mass)  {
 
   SetBranch((GenName+"_px").c_str(), mMet[0]);
   SetBranch((GenName+"_py").c_str(), mMet[1]);
@@ -20,12 +20,12 @@ Met::Met(TTree* _BOOM, string _GenName,  vector<string> _syst_names) : BOOM(_BOO
   for( auto name : syst_names) {
     if(name == "orig") 
       systVec.push_back(new TLorentzVector);
-    else if(name.find("Met")!=string::npos){
+    else if(name.find("Met")!=std::string::npos){
       systVec.push_back(new TLorentzVector);
     }
-    else if(name.find("weight")!=string::npos){
+    else if(name.find("weight")!=std::string::npos){
       systVec.push_back(nullptr);
-    }else if(name.find("Tau_qcd")!=string::npos){
+    }else if(name.find("Tau_qcd")!=std::string::npos){
       systVec.push_back(nullptr);
     }else
       systVec.push_back(new TLorentzVector);
@@ -88,9 +88,9 @@ void Met::update(PartStats& stats, Jet& jet, int syst){
   for(auto jetVec: jet) {
     bool add = true;
     if( (jetVec.Pt() < stats.dmap.at("JetPtForMhtAndHt")) ||
-	(abs(jetVec.Eta()) > stats.dmap.at("JetEtaForMhtAndHt")) ||
-	( stats.bfind("ApplyJetLooseIDforMhtAndHt") &&
-	  !jet.passedLooseJetID(i) ) ) add = false;
+        (abs(jetVec.Eta()) > stats.dmap.at("JetEtaForMhtAndHt")) ||
+        ( stats.bfind("ApplyJetLooseIDforMhtAndHt") &&
+          !jet.passedLooseJetID(i) ) ) add = false;
     if(add) {
       sumpxForMht -= jetVec.Px();
       sumpyForMht -= jetVec.Py();
@@ -99,13 +99,13 @@ void Met::update(PartStats& stats, Jet& jet, int syst){
     i++;
   }
   syst_HT.at(syst)=sumptForHt;
-  syst_MHT.at(syst)=sumpyForMht;
+  syst_MHT.at(syst)= sqrt( pow(sumpxForMht,2.0) + pow(sumpyForMht,2.0) );
   syst_MHTphi.at(syst)=atan2(sumpyForMht,sumpxForMht);
 
   systVec.at(syst)->SetPxPyPzE(systVec.at(syst)->Px()+systdeltaMEx[syst], 
-			       systVec.at(syst)->Py()+systdeltaMEy[syst], 
-			       systVec.at(syst)->Pz(), 
-			       TMath::Sqrt(pow(systVec.at(syst)->Px()+systdeltaMEx[syst],2) + pow(systVec.at(syst)->Py()+systdeltaMEy[syst],2)));
+                               systVec.at(syst)->Py()+systdeltaMEy[syst], 
+                               systVec.at(syst)->Pz(), 
+                               TMath::Sqrt(pow(systVec.at(syst)->Px()+systdeltaMEx[syst],2) + pow(systVec.at(syst)->Py()+systdeltaMEy[syst],2)));
 
 }
 
@@ -124,6 +124,15 @@ double Met::HT() const {return syst_HT.at(activeSystematic);};
 double Met::MHT() const {return syst_MHT.at(activeSystematic);};
 double Met::MHTphi() const {return syst_MHTphi.at(activeSystematic);};
 
+double Met::MT2(TLorentzVector& pa, TLorentzVector& pb){
+  mt2_event.set_momenta( pa, pb, px(), py());
+  mt2_event.set_mn( MT2mass );
+  return mt2_event.get_mt2();
+}
+
+void Met::setMT2Mass(double mass){
+  MT2mass=mass;
+}
 
 void Met::setCurrentP(int syst){
   if( systVec.at(syst) == nullptr) {

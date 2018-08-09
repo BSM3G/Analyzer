@@ -1,8 +1,8 @@
 #include "DepGraph.h"
 
-using namespace boost;
-using namespace std;
-typedef adjacency_list<vecS, vecS, directedS> mygraph;
+//using namespace boost;
+//using namespace std;
+typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS> mygraph;
 #define cutint(x) static_cast<int>(x)
 #define intcut(x) static_cast<CUTS>(x)
 
@@ -62,6 +62,15 @@ DepGraph::DepGraph() {
   add_edge(cutint(CUTS::eDiJet), cutint(CUTS::eRJet1), g);
   add_edge(cutint(CUTS::eDiJet), cutint(CUTS::eRJet2), g);
   
+  add_edge(cutint(CUTS::eElec1Jet1), cutint(CUTS::eRElec1), g);
+  add_edge(cutint(CUTS::eElec1Jet1), cutint(CUTS::eRJet1), g);
+  add_edge(cutint(CUTS::eElec1Jet2), cutint(CUTS::eRElec1), g);
+  add_edge(cutint(CUTS::eElec1Jet2), cutint(CUTS::eRJet2), g);
+  add_edge(cutint(CUTS::eElec2Jet1), cutint(CUTS::eRElec2), g);
+  add_edge(cutint(CUTS::eElec2Jet1), cutint(CUTS::eRJet1), g);
+  add_edge(cutint(CUTS::eElec2Jet2), cutint(CUTS::eRElec2), g);
+  add_edge(cutint(CUTS::eElec2Jet2), cutint(CUTS::eRJet2), g);
+  
   add_edge(cutint(CUTS::eSusyCom), cutint(CUTS::eR1stJet), g);
   add_edge(cutint(CUTS::eSusyCom), cutint(CUTS::eR2ndJet), g);
 
@@ -80,7 +89,7 @@ void DepGraph::dfs(int vertex) {
 }
 
 
-void DepGraph::loadCuts(vector<CUTS> cutVec) {
+void DepGraph::loadCuts(std::vector<CUTS> cutVec) {
   for(auto cut: cutVec) {
     int icut = cutint(cut);
     if(neededCuts.find(icut) != neededCuts.end()) continue;
@@ -100,6 +109,6 @@ bool DepGraph::isPresent(CUTS cut) {
   return (neededCuts.find(cutint(cut)) != neededCuts.end());
 }
 
-unordered_set<int> DepGraph::getCuts() {
+std::unordered_set<int> DepGraph::getCuts() {
   return neededCuts;
 }

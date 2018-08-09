@@ -15,12 +15,12 @@
 #include <algorithm>
 //#include "Particle.h"
 
-using namespace std;
+//using namespace std;
 
-template<typename T> T stringtotype(string s)
+template<typename T> T stringtotype(std::string s)
 {
     T i;
-    istringstream(s) >> i;
+    std::istringstream(s) >> i;
     return(i);
 }
 
@@ -43,7 +43,7 @@ static inline std::string &trim(std::string &s) {
     return ltrim(rtrim(s));
 }
 
-vector<string> string_split(const string& in, const vector<string> splits = {" "});
+std::vector<std::string> string_split(const std::string& in, const std::vector<std::string> splits = {" "});
 
 //BINNER
 class Bin
@@ -90,27 +90,27 @@ inline bool operator<(const Bin& A, const Bin& B)
 class JetScaleResolution{
     public:
         JetScaleResolution();
-        JetScaleResolution(const string& scalefilename, const string& parttype, const string& resolutionfile, const string& sfresolutionfile);
-        void InitScale(const string& filename, const string& type);
-        void InitResolution(const string& resolutionfile, const string& sffile);
+        JetScaleResolution(const std::string& scalefilename, const std::string& parttype, const std::string& resolutionfile, const std::string& sfresolutionfile);
+        void InitScale(const std::string& filename, const std::string& type);
+        void InitResolution(const std::string& resolutionfile, const std::string& sffile);
         double GetRes(const TLorentzVector& jet,const TLorentzVector& genjet, double rho, double sigmares);
         double GetScale(const TLorentzVector& jet, bool isBjet, double sigmascale);
 
     private:
         TH1D* Heta = nullptr;
-        vector<TH1D*> HptsP;
-        vector<TH1D*> HptsM;
-        vector<TH1D*> HptsPqcd;
-        vector<TH1D*> HptsMqcd;
-        vector<TH1D*> HptsPb;
-        vector<TH1D*> HptsMb;
+        std::vector<TH1D*> HptsP;
+        std::vector<TH1D*> HptsM;
+        std::vector<TH1D*> HptsPqcd;
+        std::vector<TH1D*> HptsMqcd;
+        std::vector<TH1D*> HptsPb;
+        std::vector<TH1D*> HptsMb;
         TGraph* hlE =nullptr;
         TGraph* hlB =nullptr;
         TGraph* hbE =nullptr;
         TGraph* hbB =nullptr;
 
-        map< Bin, map<Bin, vector<double> > > resinfo;
-        map< Bin, vector<double> > ressf;
+        std::map< Bin, std::map<Bin, std::vector<double> > > resinfo;
+        std::map< Bin, std::vector<double> > ressf;
 };
 
 #endif /*JETSCALERESOLUTION*/

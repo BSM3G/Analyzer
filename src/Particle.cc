@@ -10,21 +10,20 @@
 ///////////////////////////////////////////////////////////////////////////////////////
 
 
-
 //particle is a objet that stores multiple versions of the particle candidates
-Particle::Particle(TTree* _BOOM, string _GenName, string filename, vector<string> _syst_names) : BOOM(_BOOM), GenName(_GenName), syst_names(_syst_names) {
+Particle::Particle(TTree* _BOOM, std::string _GenName, std::string filename, std::vector<std::string> _syst_names) : BOOM(_BOOM), GenName(_GenName), syst_names(_syst_names) {
   type = PType::None;
   getPartStats(filename);
 
-  regex genName_regex(".*([A-Z][^[:space:]]+)");
-  regex syst_regex("([A-Za-z]+).+");
-  smatch mGen, mSyst;
+  std::regex genName_regex(".*([A-Z][^[:space:]]+)");
+  std::regex syst_regex("([A-Za-z]+).+");
+  std::smatch mGen, mSyst;
   
-  regex_match(GenName, mGen, genName_regex);
+  std::regex_match(GenName, mGen, genName_regex);
 
   for( auto item : syst_names) {
     if(item == "orig") {
-      systVec.push_back(new vector<TLorentzVector>());
+      systVec.push_back(new std::vector<TLorentzVector>());
       continue;
     }
     if(!regex_match(item, mSyst, syst_regex)){
@@ -32,18 +31,18 @@ Particle::Particle(TTree* _BOOM, string _GenName, string filename, vector<string
       continue;
     }
     if(mGen[1] == mSyst[1]) {
-      systVec.push_back(new vector<TLorentzVector>());
-      cout << GenName << ": " << item << endl;
+      systVec.push_back(new std::vector<TLorentzVector>());
+      std::cout << GenName << ": " << item << std::endl;
     } else {
       systVec.push_back(nullptr);
     }
   }
 
-  //set the pt to an empty vector if the branch does not exist
+  //set the pt to an empty std::vector if the branch does not exist
   //backward compatible yeah!!
   if( _BOOM->GetListOfBranches()->FindObject((GenName+"_pt").c_str()) ==0){
-    mpt=new vector<double>();
-    cout<<"no "<<GenName<<" will deactivate branch!"<<endl;
+    mpt=new std::vector<double>();
+    std::cout<<"no "<<GenName<<" will deactivate branch!"<<std::endl;
   }else{
     SetBranch((GenName+"_pt").c_str(), mpt);
     SetBranch((GenName+"_eta").c_str(), meta);
@@ -60,11 +59,11 @@ double Particle::phi(uint index)const        {return cur_P->at(index).Phi();}
 double Particle::energy(uint index)const     {return cur_P->at(index).E();}
 double Particle::charge(uint index)const     {return 0;}
 
-uint Particle::size()const                   {return Reco.size();}
-vector<TLorentzVector>::iterator Particle::begin(){ return cur_P->begin();}
-vector<TLorentzVector>::iterator Particle::end(){ return cur_P->end();}
-vector<TLorentzVector>::const_iterator Particle::begin()const { return cur_P->begin();}
-vector<TLorentzVector>::const_iterator Particle::end()const { return cur_P->end();}
+uint Particle::size()const                   {return cur_P->size();}
+std::vector<TLorentzVector>::iterator Particle::begin(){ return cur_P->begin();}
+std::vector<TLorentzVector>::iterator Particle::end(){ return cur_P->end();}
+std::vector<TLorentzVector>::const_iterator Particle::begin()const { return cur_P->begin();}
+std::vector<TLorentzVector>::const_iterator Particle::end()const { return cur_P->end();}
 
 TLorentzVector Particle::p4(uint index)const {return (cur_P->at(index));}
 TLorentzVector& Particle::p4(uint index) {return cur_P->at(index);}
@@ -104,7 +103,7 @@ void Particle::init(){
 
 
 void Particle::setOrigReco() {
-  /////memory loss here if no smear and new vector. Only once, so ignore for now...
+  /////memory loss here if no smear and new std::vector. Only once, so ignore for now...
   systVec.at(0) = &Reco;
 }
 
@@ -130,9 +129,9 @@ void Particle::unBranch() {
 }
 
 
-void Particle::getPartStats(string filename) {
+void Particle::getPartStats(std::string filename) {
   typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-  ifstream info_file(filename);
+  std::ifstream info_file(filename);
   boost::char_separator<char> sep(", \t");
 
   if(!info_file) {
@@ -140,8 +139,8 @@ void Particle::getPartStats(string filename) {
     return;
   }
 
-  vector<string> stemp;
-  string group,line;
+  std::vector<std::string> stemp;
+  std::string group,line;
   while(getline(info_file, line)) {
     tokenizer tokens(line, sep);
     stemp.clear();
@@ -154,16 +153,16 @@ void Particle::getPartStats(string filename) {
       group = stemp[0];
       continue;
     } else if(group == "") {
-      cout << "error in " << filename << "; no groups specified for data" << endl;
+      std::cout << "error in " << filename << "; no groups specified for data" << std::endl;
       exit(1);
     } else if(stemp.size() == 2) {
 
       if(stemp[1] == "1" || stemp[1] == "true" ) pstats[group].bset.push_back(stemp[0]);
       //      else if(stemp[1] == "0"  || stemp[1] == "false" ) pstats[group]bmap[stemp[0]]=false;
 
-      else if(stemp[1].find_first_not_of("0123456789+-.") == string::npos) pstats[group].dmap[stemp[0]]=stod(stemp[1]);
+      else if(stemp[1].find_first_not_of("0123456789+-.") == std::string::npos) pstats[group].dmap[stemp[0]]=stod(stemp[1]);
       else pstats[group].smap[stemp[0]] = stemp[1];
-    } else  pstats[group].pmap[stemp[0]] = make_pair(stod(stemp[1]), stod(stemp[2]));
+    } else  pstats[group].pmap[stemp[0]] = std::make_pair(stod(stemp[1]), stod(stemp[2]));
   }
   info_file.close();
 }
@@ -176,7 +175,7 @@ void Particle::getPartStats(string filename) {
 ///////////////////////////////////////////////////////////////////////////////////////
 
 
-Photon::Photon(TTree* _BOOM, string filename, vector<string> syst_names) : Particle(_BOOM, "Photon", filename, syst_names) {
+Photon::Photon(TTree* _BOOM, std::string filename, std::vector<std::string> syst_names) : Particle(_BOOM, "Photon", filename, syst_names) {
   SetBranch("Photon_et", et);
   SetBranch("Photon_HoverE", hoverE);
   SetBranch("Photon_phoR9", phoR);
@@ -196,7 +195,7 @@ Photon::Photon(TTree* _BOOM, string filename, vector<string> syst_names) : Parti
 ///////////////////////////////////////////////////////////////////////////////////////
 
 
-Generated::Generated(TTree* _BOOM, string filename, vector<string> syst_names) : Particle(_BOOM, "Gen", filename, syst_names) {
+Generated::Generated(TTree* _BOOM, std::string filename, std::vector<std::string> syst_names) : Particle(_BOOM, "Gen", filename, syst_names) {
 
   SetBranch("Gen_pdg_id", pdg_id);
   SetBranch("Gen_motherpdg_id", motherpdg_id);
@@ -213,7 +212,7 @@ Generated::Generated(TTree* _BOOM, string filename, vector<string> syst_names) :
 ///////////////////////////////////////////////////////////////////////////////////////
 
 
-Jet::Jet(TTree* _BOOM, string filename, vector<string> syst_names) : Particle(_BOOM, "Jet", filename, syst_names) {
+Jet::Jet(TTree* _BOOM, std::string filename, std::vector<std::string> syst_names) : Particle(_BOOM, "Jet", filename, syst_names) {
   type = PType::Jet;
   SetBranch("Jet_neutralHadEnergyFraction", neutralHadEnergyFraction);
   SetBranch("Jet_neutralEmEmEnergyFraction", neutralEmEmEnergyFraction);
@@ -226,16 +225,16 @@ Jet::Jet(TTree* _BOOM, string filename, vector<string> syst_names) : Particle(_B
   SetBranch("Jet_bDiscriminator_pfCISVV2", bDiscriminator);
 }
 
-vector<CUTS> Jet::findExtraCuts() {
-  vector<CUTS> return_vec;
+std::vector<CUTS> Jet::findExtraCuts() {
+  std::vector<CUTS> return_vec;
   if(pstats["Smear"].bfind("SmearTheJet")) {
     return_vec.push_back(CUTS::eGen);
   }
   return return_vec;
 }
 
-vector<CUTS> Jet::overlapCuts(CUTS ePos) {
-  vector<CUTS> returnCuts;
+std::vector<CUTS> Jet::overlapCuts(CUTS ePos) {
+  std::vector<CUTS> returnCuts;
   auto& tmpset = pstats[jetNameMap.at(ePos)];
   if(tmpset.bfind("RemoveOverlapWithMuon1s")) returnCuts.push_back(CUTS::eRMuon1);
   if(tmpset.bfind("RemoveOverlapWithMuon2s")) returnCuts.push_back(CUTS::eRMuon2);
@@ -268,7 +267,7 @@ bool Jet::passedLooseJetID(int nobj) {
 ///////////////////////////////////////////////////////////////////////////////////////
 
 
-FatJet::FatJet(TTree* _BOOM, string filename, vector<string> syst_names) : Particle(_BOOM, "Jet_toptag", filename, syst_names) {
+FatJet::FatJet(TTree* _BOOM, std::string filename, std::vector<std::string> syst_names) : Particle(_BOOM, "Jet_toptag", filename, syst_names) {
   type = PType::FatJet;
   SetBranch("Jet_toptag_tau1", tau1);
   SetBranch("Jet_toptag_tau2", tau2);
@@ -277,16 +276,16 @@ FatJet::FatJet(TTree* _BOOM, string filename, vector<string> syst_names) : Parti
   SetBranch("Jet_toptag_SoftDropMass", SoftDropMass);
 }
 
-vector<CUTS> FatJet::findExtraCuts() {
-  vector<CUTS> return_vec;
+std::vector<CUTS> FatJet::findExtraCuts() {
+  std::vector<CUTS> return_vec;
   if(pstats["Smear"].bfind("SmearTheJet")) {
     return_vec.push_back(CUTS::eGen);
   }
   return return_vec;
 }
 
-vector<CUTS> FatJet::overlapCuts(CUTS ePos) {
-  vector<CUTS> returnCuts;
+std::vector<CUTS> FatJet::overlapCuts(CUTS ePos) {
+  std::vector<CUTS> returnCuts;
   auto& tmpset = pstats[jetNameMap.at(ePos)];
   if(tmpset.bfind("RemoveOverlapWithMuon1s")) returnCuts.push_back(CUTS::eRMuon1);
   if(tmpset.bfind("RemoveOverlapWithMuon2s")) returnCuts.push_back(CUTS::eRMuon2);
@@ -306,14 +305,17 @@ vector<CUTS> FatJet::overlapCuts(CUTS ePos) {
 ///////////////////////////////////////////////////////////////////////////////////////
 
 
-Lepton::Lepton(TTree* _BOOM, string GenName, string EndName, vector<string> syst_names) : Particle(_BOOM, GenName, EndName, syst_names) {
+Lepton::Lepton(TTree* _BOOM, std::string GenName, std::string EndName, std::vector<std::string> syst_names) : Particle(_BOOM, GenName, EndName, syst_names) {
   SetBranch((GenName+"_charge").c_str(), _charge);
 }
 
-vector<CUTS> Lepton::findExtraCuts() {
-  vector<CUTS> return_vec;
+std::vector<CUTS> Lepton::findExtraCuts() {
+  std::vector<CUTS> return_vec;
   auto& tmpset = pstats["Smear"];
   if(tmpset.bfind("SmearTheParticle") || tmpset.bfind("MatchToGen")) {
+    return_vec.push_back(cutMap.at(type));
+  }
+  if(tmpset.bfind("doEfficiencyPlots")){
     return_vec.push_back(cutMap.at(type));
   }
   return return_vec;
@@ -328,7 +330,7 @@ double Lepton::charge(uint index)const     {return _charge->at(index);}
 ///////////////////////////////////////////////////////////////////////////////////////
 
 
-Electron::Electron(TTree* _BOOM, string filename, vector<string> syst_names) : Lepton(_BOOM, "patElectron", filename, syst_names) {
+Electron::Electron(TTree* _BOOM, std::string filename, std::vector<std::string> syst_names) : Lepton(_BOOM, "patElectron", filename, syst_names) {
   type = PType::Electron;
   auto& elec1 = pstats["Elec1"];
   auto& elec2 = pstats["Elec2"];
@@ -369,7 +371,7 @@ bool Electron::get_Iso(int index, double min, double max) const {
 ///////////////////////////////////////////////////////////////////////////////////////
 
 
-Muon::Muon(TTree* _BOOM, string filename, vector<string> syst_names) : Lepton(_BOOM, "Muon", filename, syst_names) {
+Muon::Muon(TTree* _BOOM, std::string filename, std::vector<std::string> syst_names) : Lepton(_BOOM, "Muon", filename, syst_names) {
   type = PType::Muon;
   auto& mu1 = pstats["Muon1"];
   auto& mu2 = pstats["Muon2"];
@@ -402,12 +404,12 @@ bool Muon::get_Iso(int index, double min, double max) const {
 ///////////////////////////////////////////////////////////////////////////////////////
 
 
-Taus::Taus(TTree* _BOOM, string filename, vector<string> syst_names) : Lepton(_BOOM, "Tau", filename, syst_names) {
+Taus::Taus(TTree* _BOOM, std::string filename, std::vector<std::string> syst_names) : Lepton(_BOOM, "Tau", filename, syst_names) {
   type = PType::Tau;
 
   ////Electron discrimination  
-  string string_tau1 = pstats["Tau1"].smap["DiscrAgainstElectron"];
-  string string_tau2 = pstats["Tau2"].smap["DiscrAgainstElectron"];
+  std::string string_tau1 = pstats["Tau1"].smap["DiscrAgainstElectron"];
+  std::string string_tau2 = pstats["Tau2"].smap["DiscrAgainstElectron"];
 
   SetBranch(("Tau_" + string_tau1).c_str(), againstElectron.first);
   if(string_tau1 != string_tau2) {
@@ -439,12 +441,16 @@ Taus::Taus(TTree* _BOOM, string filename, vector<string> syst_names) : Lepton(_B
   string_tau1 = pstats["Tau1"].smap["DiscrByMinIsolation"];
   string_tau2 = pstats["Tau2"].smap["DiscrByMinIsolation"];
   if(string_tau1 != "ZERO") {
-    SetBranch(("Tau_" + string_tau1).c_str(), maxIso.first);
+    SetBranch(("Tau_" + string_tau1).c_str(), minIso.first);
+  }else{
+    minIso.first=nullptr;
   }
   if(string_tau2 != "ZERO" && string_tau1 != string_tau2) {
-    SetBranch(("Tau_"+ string_tau2).c_str(), maxIso.second);
-  } else {
-    maxIso.second = maxIso.first;
+    SetBranch(("Tau_"+ string_tau2).c_str(), minIso.second);
+  } else if (string_tau2 != "ZERO"){
+    minIso.second=nullptr;
+  } else{
+    minIso.second = minIso.first;
   }
 
   SetBranch("Tau_decayModeFinding", decayModeFinding);
@@ -454,11 +460,12 @@ Taus::Taus(TTree* _BOOM, string filename, vector<string> syst_names) : Lepton(_B
   SetBranch("Tau_leadChargedCandPt", leadChargedCandPt);
   SetBranch("Tau_leadChargedCandTrack_ptError", leadChargedCandPtError);
   SetBranch("Tau_leadChargedCandValidHits", leadChargedCandValidHits);
+  SetBranch("Tau_leadChargedCandDz_pv", leadChargedCandDz_pv);
 
 }
 
-vector<CUTS> Taus::findExtraCuts() {
-  vector<CUTS> return_vec = Lepton::findExtraCuts();
+std::vector<CUTS> Taus::findExtraCuts() {
+  std::vector<CUTS> return_vec = Lepton::findExtraCuts();
 
   auto& tau1 = pstats["Tau1"];
   auto& tau2 = pstats["Tau2"];
@@ -474,11 +481,24 @@ vector<CUTS> Taus::findExtraCuts() {
   return return_vec;
 }
 
-bool Taus::get_Iso(int index, double onetwo, double max) const {
+bool Taus::get_Iso(int index, double onetwo, double flipisolation) const {
   double maxIsoval = (onetwo == 1) ? maxIso.first->at(index) : maxIso.second->at(index);
-  vector<int>* minIsotmp = (onetwo == 1) ? minIso.first : minIso.second;
-  double minIsoval = (minIsotmp != 0) ? minIsotmp->at(index) : true;
-  return (maxIsoval > 0.5 && minIsoval > 0.5);
+  if(!flipisolation){
+    return (maxIsoval > 0.5 );
+  } else{
+    double minIsoval=1;
+    if(onetwo == 1 ){
+      if(minIso.first!=nullptr){
+        minIsoval=minIso.first->at(index);
+      }
+    }else{
+      if(minIso.second!=nullptr){
+        minIsoval=minIso.second->at(index);
+      }
+    }
+    return (maxIsoval < 0.5 && minIsoval > 0.5);
+  }
+  return (maxIsoval > 0.5 );
 }
 
 bool Taus::pass_against_Elec(CUTS ePos, int index) {

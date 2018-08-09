@@ -9,11 +9,11 @@ class Analyzer;
 class CRTester {
  public:
   const FillVals* info;
-  const string variable;
+  const std::string variable;
   const double cutVal;
-  const string partName;
+  const std::string partName;
 
-  CRTester(FillVals* _info, string var, double val, string _name);
+  CRTester(FillVals* _info, std::string var, double val, std::string _name);
   bool test(Analyzer* analyzer);
   bool partPassBoth(Analyzer*);
 };

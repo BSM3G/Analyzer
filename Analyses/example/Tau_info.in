@@ -3,8 +3,8 @@
 /////////////////////////////////
 
 SmearTheParticle 0
-PtScaleOffset 1.0
-PtSigmaOffset 1.
+PtScaleOffset 1.
+PtResolutionOffset 1.
 EtaScaleOffset 1.
 EtaSigmaOffset 1.
 PhiScaleOffset 1.
@@ -16,6 +16,7 @@ MatchToGen 0
 GenMatchingDeltaR 0.4
 
 TauSF 1. 
+doEfficiencyPlots true
 
 //////////////////////////////
             Tau1
@@ -30,10 +31,13 @@ DoDiscrByLeadTrack true
 LeadTrackThreshold 5.0
 
 DoDiscrByIsolation true
-DiscrByMinIsolation ZERO
-DiscrByMaxIsolation byTightIsolationMVArun2v1DBnewDMwLT
+DiscrByMinIsolation byVLooseIsolationMVArun2v1DBnewDMwLT
+DiscrByMaxIsolation byLooseIsolationMVArun2v1DBnewDMwLT
+FlipIsolationRequirement false
 DiscrByProngType true
 ProngType  1or3hps
+decayModeFindingNewDMs false
+decayModeFinding true
 
 DoDiscrAgainstElectron true
 DiscrAgainstElectron againstElectronMVALooseMVA6
@@ -78,8 +82,11 @@ LeadTrackThreshold 5.0
 DoDiscrByIsolation true
 DiscrByMinIsolation ZERO
 DiscrByMaxIsolation byTightIsolationMVArun2v1DBnewDMwLT
+FlipIsolationRequirement false
 DiscrByProngType true
 ProngType  1or3hps
+decayModeFindingNewDMs false
+decayModeFinding true
 
 DoDiscrAgainstElectron true
 DiscrAgainstElectron againstElectronMVALooseMVA6

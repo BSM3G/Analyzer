@@ -4,7 +4,7 @@
 
 SmearTheParticle 0
 PtScaleOffset 1.
-PtSigmaOffset 1.
+PtResolutionOffset 1.
 EtaScaleOffset 1.
 EtaSigmaOffset 1.
 PhiScaleOffset 1.
@@ -16,6 +16,7 @@ MatchToGen 0
 GenMatchingDeltaR 0.1
 UseMotherID 1
 MotherID 23.
+doEfficiencyPlots true
 
 ////////////////////////////////
              Elec1

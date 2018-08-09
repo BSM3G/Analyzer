@@ -1,13 +1,13 @@
 #ifndef DepGraph_h
 #define DepGraph_h
 
-#include <boost/graph/adjacency_list.hpp>
 #include <iostream>
 #include "Cut_enum.h"
 #include <unordered_set>
+#include <boost/graph/adjacency_list.hpp>
 
 
-using namespace std;
+//using namespace std;
 typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS> mygraph;
 
 class DepGraph {
@@ -15,16 +15,16 @@ class DepGraph {
 public:
 
   DepGraph();
-  void loadCuts(vector<CUTS>);
+  void loadCuts(std::vector<CUTS>);
   void loadCuts(CUTS);
   bool isPresent(CUTS);
-  unordered_set<int> getCuts();
+  std::unordered_set<int> getCuts();
   
 private:
   void dfs(int vertex);
   mygraph g;
 
-  unordered_set<int> neededCuts;
+  std::unordered_set<int> neededCuts;
 };
 
 #endif
