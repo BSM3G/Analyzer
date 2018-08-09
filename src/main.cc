@@ -113,11 +113,16 @@ int main (int argc, char* argv[]) {
     Nentries=100;
     testing.nentries=100;
   }
+  //testing.checkParticleDecayList();
   //main event loop
   for(size_t i=0; i < Nentries; i++) {
     testing.clear_values();
     testing.preprocess(i);
-    //testing.writeParticleDecayList(i, f);  commented-out 7.27.17
+    //int hadw = testing.getGoodHadW();
+    //if (hadw >= 1){continue;}  //Changed on 05.15.18 to clean TT inclusive.  Only let the hadronic events through.  Leptonic returned -1.  Weirdo returned -2.  Otherwise, hadronic returned the value of the iterator.
+        
+    //if (i < 25)
+    //{testing.writeParticleDecayList(i);}  //Changed on 05.15.18 to clean TT inclusive.  This will write the particle decay list for the first 50 events.
     testing.fill_histogram();
     //this will be set if ctrl+c is pressed  //commented-out7.27.17
     if(do_break){
@@ -125,6 +130,9 @@ int main (int argc, char* argv[]) {
       break;
     }
   }
+  //cout << "leptonic: " << leptonic << endl;
+  //cout << "notleptonic: " << notleptonic << endl;
+  
   //f.close();  //commented-out 7.27.17
   testing.printCuts();
   return 0;

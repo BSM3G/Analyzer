@@ -27,7 +27,10 @@ Particle::Particle(TTree* _BOOM, string _GenName, string filename, vector<string
       systVec.push_back(new vector<TLorentzVector>());
       continue;
     }
-    if(!regex_match(item, mSyst, syst_regex)) continue;
+    if(!regex_match(item, mSyst, syst_regex)){
+      systVec.push_back(nullptr);
+      continue;
+    }
     if(mGen[1] == mSyst[1]) {
       systVec.push_back(new vector<TLorentzVector>());
       cout << GenName << ": " << item << endl;
@@ -199,6 +202,7 @@ Generated::Generated(TTree* _BOOM, string filename, vector<string> syst_names) :
   SetBranch("Gen_motherpdg_id", motherpdg_id);
   SetBranch("Gen_status", status);
   SetBranch("Gen_BmotherIndex", BmotherIndex);
+  SetBranch("Gen_numDaught",numDaught);      //4.22.18
 }
 
 

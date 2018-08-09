@@ -23,19 +23,24 @@ Met::Met(TTree* _BOOM, string _GenName,  vector<string> _syst_names) : BOOM(_BOO
     else if(name.find("Met")!=string::npos){
       systVec.push_back(new TLorentzVector);
     }
-    else
+    else if(name.find("weight")!=string::npos){
       systVec.push_back(nullptr);
+    }else if(name.find("Tau_qcd")!=string::npos){
+      systVec.push_back(nullptr);
+    }else
+      systVec.push_back(new TLorentzVector);
   }
+  
 
-  if( std::find(syst_names.begin(), syst_names.end(), "Met_Uncl_Up") != syst_names.end() && _BOOM->GetListOfBranches()->FindObject((GenName+"_UnclEnshiftedPtUp").c_str()) !=0){
+  if( std::find(syst_names.begin(), syst_names.end(), "MetUncl_Up") != syst_names.end() && _BOOM->GetListOfBranches()->FindObject((GenName+"_UnclEnshiftedPtUp").c_str()) !=0){
     SetBranch((GenName+"_UnclEnshiftedPtUp").c_str(), MetUnclUp[0]);
     SetBranch((GenName+"_UnclEnshiftedPhiUp").c_str(), MetUnclUp[1]);
-    Unclup = std::find(syst_names.begin(), syst_names.end(), "Met_Uncl_Up") -syst_names.begin();
+    Unclup = std::find(syst_names.begin(), syst_names.end(), "MetUncl_Up") -syst_names.begin();
   }
-  if( std::find(syst_names.begin(), syst_names.end(), "Met_Uncl_Down") != syst_names.end() && _BOOM->GetListOfBranches()->FindObject((GenName+"_UnclEnshiftedPtDown").c_str()) !=0){
+  if( std::find(syst_names.begin(), syst_names.end(), "MetUncl_Down") != syst_names.end() && _BOOM->GetListOfBranches()->FindObject((GenName+"_UnclEnshiftedPtDown").c_str()) !=0){
     SetBranch((GenName+"_UnclEnshiftedPtDown").c_str(), MetUnclDown[0]);
     SetBranch((GenName+"_UnclEnshiftedPhiDown").c_str(), MetUnclDown[1]);
-    Uncldown = std::find(syst_names.begin(), syst_names.end(), "Met_Uncl_Down")- syst_names.begin();
+    Uncldown = std::find(syst_names.begin(), syst_names.end(), "MetUncl_Down")- syst_names.begin();
   }
 
   activeSystematic=0;

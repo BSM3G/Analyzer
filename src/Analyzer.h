@@ -56,8 +56,10 @@ public:
   void printCuts();
   void writeout();
   int nentries;
-  void checkParticleDecayList(int);
-  void writeParticleDecayList(int, fstream&);
+  void checkParticleDecayList();  //Changed on 05.15.18 to clean TT inclusive.
+  void writeParticleDecayList(int);  //Changed on 05.15.18 to clean TT inclusive.
+  void getGoodHadW();  //Changed on 05.15.18 to clean TT inclusive. 05.21.18 removed (int). 05.22.18 Changed to void.
+  void getGoodGenBJet(); //07.25.18
   bool checkforW();
   bool checkforZ();
   void fill_histogram();
@@ -106,6 +108,7 @@ private:
   void getGoodGen(const PartStats&);
   void getGoodRecoLeptons(const Lepton&, const CUTS, const CUTS, const PartStats&, const int);
   void getGoodRecoJets(CUTS, const PartStats&, const int);
+  void getGoodRecoBJets(CUTS, const PartStats&, const int);
   void getGoodRecoFatJets(CUTS, const PartStats&, const int);
 
   void getGoodLeptonCombos(Lepton&, Lepton&, CUTS,CUTS,CUTS, const PartStats&, const int);
@@ -121,6 +124,7 @@ private:
   bool isZdecay(const TLorentzVector&, const Lepton&);
 
   bool isOverlaping(const TLorentzVector&, Lepton&, CUTS, double);
+  bool isOverlapingB(const TLorentzVector&, Jet&, CUTS, double);
   bool passProng(string, int);
   bool isInTheCracks(float);
   bool passedLooseJetID(int);
@@ -131,8 +135,11 @@ private:
   double getParallelRecoilWeight(const TLorentzVector&, const TLorentzVector&);
   void create_fillInfo();
 
-  double getZBoostWeight();
-
+  double getZBoostWeight(int ud);
+  double getTopBoostWeight();     //04.22.18
+  double getBJetSF(CUTS, const PartStats&); //06.13.18
+  double getBJetSFResUp(CUTS, const PartStats&); //07.05.18
+  double getBJetSFResDown(CUTS, const PartStats&); //07.05.18
 
   inline bool passCutRange(string, double, const PartStats&);
   bool passCutRange(double, const pair<double, double>&);

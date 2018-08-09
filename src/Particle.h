@@ -135,6 +135,7 @@ public:
   vector<double>  *motherpdg_id = 0;
   vector<double>  *status = 0;
   vector<int>  *BmotherIndex = 0;
+  vector<double> *numDaught = 0;     //04.22.18
 
 };
 

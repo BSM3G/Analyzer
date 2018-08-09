@@ -130,7 +130,7 @@ double JetScaleResolution::GetRes(const TLorentzVector& jet,const TLorentzVector
     if(sigmares > 0) {s = sfs[0] + sigmares*(sfs[2]-sfs[0]);}
 
 
-    if(genjet == TLorentzVector(0,0,0,0) )
+    if(genjet != TLorentzVector(0,0,0,0) )
     {
         rescor +=  (s-1)*(jet.Pt()-genjet.Pt())/jet.Pt();
     }

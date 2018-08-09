@@ -1,8 +1,0 @@
-Control_Region
-
-Run_Met  50
-Muon1Muon2_PassBoth  10
-
-SR <>
-Unblind  false
-//Muon1Tau1_Mass 100
