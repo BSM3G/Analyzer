@@ -122,7 +122,6 @@ int main (int argc, char* argv[]) {
     Nentries=100;
     testing.nentries=100;
   }
-  //testing.checkParticleDecayList();
   //main event loop
   for(size_t i=0; i < Nentries; i++) {
     if(i==0){
@@ -139,10 +138,6 @@ int main (int argc, char* argv[]) {
       break;
     }
   }
-  //cout << "leptonic: " << leptonic << std::endl;
-  //cout << "notleptonic: " << notleptonic << std::endl;
-  
-  //f.close();  //commented-out 7.27.17
   testing.printCuts();
   spechialAna.end_run();
   return 0;

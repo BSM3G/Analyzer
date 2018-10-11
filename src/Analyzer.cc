@@ -101,7 +101,7 @@ Analyzer::Analyzer(std::vector<std::string> infiles, std::string outfile, bool s
     trigName[i] = tmps;
   }
 
-  filespace="PartDet";
+  filespace=configFolder;
   filespace+="/";
 
   setupGeneral();
@@ -412,7 +412,6 @@ void Analyzer::clear_values() {
 
 ///Function that does most of the work.  Calculates the number of each particle
 void Analyzer::preprocess(int event) {
-  //cout << "event: " << event << std::endl;
   BOOM->GetEntry(event);
   for(Particle* ipart: allParticles){
     ipart->init();
@@ -517,7 +516,6 @@ void Analyzer::getGoodParticles(int syst){
   getGoodRecoLeptons(*_Tau, CUTS::eRTau1, CUTS::eGTau, _Tau->pstats["Tau1"],syst);
   getGoodRecoLeptons(*_Tau, CUTS::eRTau2, CUTS::eGTau, _Tau->pstats["Tau2"],syst);
   getGoodRecoBJets(CUTS::eRBJet, _Jet->pstats["BJet"],syst);
-  //cout << "function called" << std::endl;
   getGoodRecoJets(CUTS::eRJet1, _Jet->pstats["Jet1"],syst);
   getGoodRecoJets(CUTS::eRJet2, _Jet->pstats["Jet2"],syst);
   getGoodRecoJets(CUTS::eRCenJet, _Jet->pstats["CentralJet"],syst);
@@ -730,7 +728,6 @@ void Analyzer::printCuts() {
 
   //write all the histograms
   //attention this is not the fill_histogram method from the Analyser
-  std::cout << "--------\n" << std::endl;
   histo.fill_histogram();
   if(doSystematics)
     syst_histo.fill_histogram();
@@ -955,7 +952,7 @@ void Analyzer::initializeTrigger() {
       for(int k = 0; k < (int)Trigger_names->size(); k++) {
         if(Trigger_names->at(k).find(trigName[i]->at(j)) != std::string::npos) {
           trigPlace[i]->at(j) = k;
-          std::cout << "Trigger_names->at(k): " << Trigger_names->at(k) << std::endl;
+          //std::cout << "Trigger_names->at(k): " << Trigger_names->at(k) << std::endl;
           break;
         }
       }
@@ -1082,13 +1079,10 @@ void Analyzer::setCutNeeds() {
     //cout << "loaded W and Z." << std::endl;
     //neededCuts.loadCuts(CUTS::eGHadW); //05.21.18
   }
-  //neededCuts.loadCuts(CUTS::eGen);
-  //neededCuts.loadCuts(CUTS::eGZ);
-  //neededCuts.loadCuts(CUTS::eGW);
-  
-  neededCuts.loadCuts(CUTS::eGHadW); //05.21.18
-  neededCuts.loadCuts(CUTS::eGBJet); //07.25.18
-  
+  if(!isData){
+    neededCuts.loadCuts(CUTS::eGHadW); //05.21.18
+    neededCuts.loadCuts(CUTS::eGBJet); //07.25.18
+  }
   neededCuts.loadCuts(_Jet->findExtraCuts());
   if(doSystematics) {
     neededCuts.loadCuts(CUTS::eGen);
@@ -1521,7 +1515,6 @@ void Analyzer::getGoodRecoJets(CUTS ePos, const PartStats& stats, const int syst
       else if(cut == "ApplyJetBTagging") passCuts = passCuts && (_Jet->bDiscriminator->at(i) > stats.dmap.at("JetBTaggingCut"));
       else if(cut == "MatchBToGen") passCuts = passCuts && (isData ||  abs(_Jet->partonFlavour->at(i)) == 5);
       else if(cut == "ApplyLooseID") passCuts = passCuts && _Jet->passedLooseJetID(i);
-      else if(cut == "RemoveOverlapWithBs") passCuts = passCuts && !isOverlapingB(lvec, *_Jet, CUTS::eRBJet, stats.dmap.at("BJMatchingDeltaR"));
     // ----anti-overlap requirements
       else if(cut == "RemoveOverlapWithMuon1s") passCuts = passCuts && !isOverlaping(lvec, *_Muon, CUTS::eRMuon1, stats.dmap.at("Muon1MatchingDeltaR"));
       else if (cut =="RemoveOverlapWithMuon2s") passCuts = passCuts && !isOverlaping(lvec, *_Muon, CUTS::eRMuon2, stats.dmap.at("Muon2MatchingDeltaR"));
@@ -2209,56 +2202,6 @@ std::pair<double, double> Analyzer::getPZeta(const TLorentzVector& Tobj1, const 
   return std::make_pair(px*zetaX + py*zetaY, visPx*zetaX + visPy*zetaY);
 }
 
-//---MY WEIGHTING and DECAY LIST----------------------------------------------------------------------------------------------------------------------------------------
-// double Analyzer::getZBoostWeight(){  //new7.28.17
-//   double z2_p = 0.; //new9.14.17
-//   for (unsigned p=0; p < _Gen->pt->size(); p++){ //new9.14.17 Loop over the full size of _Gen
-//     if (_Gen->pdg_id->at(p) == 23 && (_Gen->status->at(p) == 2 || _Gen->status->at(p) == 62)){ //new9.14.17 If we get a Z with the right status...
-//       z2_p = _Gen->pt->at(p); //new9.14.17 ...we grab its p_T...
-//       break; //new9.14.17 ..and then get out of the loop once we have it.
-//     }
-//   }
-//   return z2_p;
-//   //return (Tobj1 + Tobj2).Pt();  //new7.28.17
-// }//new7.28.17
-
-// double Analyzer::getWBoostWeight(){  //new7.28.17
-//   double w2_p = 0.;  //new7.28.17
-//   for (unsigned p=0; p < _Gen->pt->size(); p++){  //new7.28.17 Loop over the full size of _Gen.
-//     if (_Gen->pdg_id->at(p) == 24 && (_Gen->status->at(p) == 2 || _Gen->status->at(p) == 62)){  //new7.28.17 If we get a W with the right status...
-//     w2_p = _Gen->pt->at(p);  //new7.28.17 ...we grab its p_T...
-//     break;  //new7.28.17 ...and then get out of the loop once we have it.
-//     }  //new7.28.17
-//   }  //new7.28.17
-//     return w2_p;  //new7.28.17 We want to return the p_T of the W.
-// }  //new7.28.17
-  
-// double Analyzer::getParallelRecoilWeight(const TLorentzVector& Tobj1, const TLorentzVector& Tobj2){
-//   //-----Get the recoil Lorentz std::vector.-----//
-//   double boostzpx = Tobj1.Px() + Tobj2.Px();     //x-component of zboost
-//   double boostzpy = Tobj1.Py() + Tobj2.Py();     //y-component of zboost
-//   TLorentzVector boostzplorentz;     //Make Lorentz std::vector for zboost.           
-//   boostzplorentz.SetPxPyPzE(boostzpx, boostzpy, 0, 0);     //Fill Lorentz vec. 
-//   TLorentzVector u_t;     //Make Lorentz std::vector for recoil.
-//   u_t = -1 * (boostzplorentz + theMETVector);     //Fill Lorentz vec (will use Px, Py).
-    
-//   //-----2-vector for zboost now.-----//
-//   TVector2 boostzp;     //two-component boost (Pt) std::vector for easy manipulations
-//   boostzp.Set(boostzpx, boostzpy);     //Fill TVector 2.
-
-//   //-----Get unit std::vectors parallel and perpendicular to boost.-----//
-//   TVector2 boostzp_unitpar;     //two-component unit std::vector parallel to the Z Pt
-//   boostzp_unitpar = boostzp.Unit();
-//   TVector2 boostzp_unitper;     //two-component unit std::vector perp. to the Z Pt
-//   boostzp_unitper.Set((-1 / boostzp.Mod()) * boostzpy, (1 / boostzp.Mod()) * boostzpx);
-
-//   //-----Project the recoil onto the parallel unit std::vector to zboost.-----//
-//   TVector2 ut_pt2;     //two-component std::vector for the recoil Pt in each direction.
-//   ut_pt2.Set(u_t.Px(), u_t.Py());
-//   double ut_par = boostzp_unitpar * ut_pt2;     //Project recoil onto unit std::vector parallel to the Z Pt.
-  
-//   return ut_par;
-// }
 
 void Analyzer::checkParticleDecayList(){
   std::fstream file;
@@ -2424,7 +2367,6 @@ void Analyzer::fill_histogram() {
       active_part = &goodParts;
       fillCuts(true);
       for(auto it: *groups) {
-        //cout << "it1: " << it << std::endl;
         fill_Folder(it, maxCut, histo, false);
       }
       if(!fillCuts(false)) {
@@ -2534,19 +2476,7 @@ void Analyzer::fill_Folder(std::string group, const int max, Histogramer &ihisto
     histAddVal(true, "Events");
     histAddVal(bestVertices, "NVertices");
   } else if(!isData && group == "FillGen") {
-    //int nhadW = 0; //05.22.18
-    //int p = 0; //05.22.18
-    //int hadW = 0; 
-    //for(vec_iter it = active_part->at(CUTS::eGW)->begin(); it!=active_part->at(CUTS::eGW)->end(); it++){  //05.22.18
-    //}  //05.22.18
-    //if (hadW == -1){nhadW++;}}  //05.22.18
-    //int num_hadW = 0;
-    //for(auto it : *active_part->at(CUTS::eGHadW)){
-    //int num_eitherW = active_part->at(CUTS::eGHadW)->at(it);
-    //if (num_eitherW == 0){num_hadW++)
-    //histAddVal(num_hadW, "NHadW");} //05.22.18
     histAddVal(active_part->at(CUTS::eGHadW)->size(), "NHadW");
-    //histAddVal(active_part->at(CUTS::eGHadW)->size(),"NHadW");
     int nhadtau = 0;
     TLorentzVector genVec;
     int i = 0;
@@ -2557,17 +2487,6 @@ void Analyzer::fill_Folder(std::string group, const int max, Histogramer &ihisto
         histAddVal(genVec.Pt(), "HadTauPt");
         histAddVal(genVec.Eta(), "HadTauEta");
         nhadtau++;
-        //--MY CODE FROM VALIDATING ALEJANDRO'S W-STUDIES---------------------------------------------------------------------------------------------------------------
-        //double ghadtau_frac_scalar = Hadtau.Pt() / (Hadtau.Pt()+nu.Pt());
-        //double ghadtau_frac_vector = Hadtau.Pt() / (Gentau.Pt());
-        //histAddVal(ghadtau_frac_scalar, "HadTauFrac_scalar");
-        //histAddVal(ghadtau_frac_vector, "HadTauFrac_vector");
-        //histAddVal(Hadtau.Pt(), "HadTauPt");
-        //histAddVal(nu.Pt(), "NuPt");
-        //histAddVal(nu.P(), "NuP");
-        //histAddVal(Hadtau.Eta(), "HadTauEta");
-        //histAddVal(Hadtau.DeltaR(nu), "DeltaR");
-        //---END MY CODE FROM VALIDATING ALEJANDRO'S W-STUDIES----------------------------------------------------------------------------------------------------------
       }
       histAddVal(_Gen->energy(*it), "TauEnergy");
       histAddVal(_Gen->pt(*it), "TauPt");

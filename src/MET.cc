@@ -77,7 +77,7 @@ void Met::init(){
 }
 
 
-void Met::update(PartStats& stats, Jet& jet, int syst){
+void Met::update(PartStats& stats, Jet& jet, int syst=0){
   ///Calculates met from values from each file plus smearing and treating muons as neutrinos
   if(systVec.at(syst) == nullptr) return;
   double sumpxForMht=0;
