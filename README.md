@@ -1,4 +1,26 @@
+
 # Setting Up
+
+checkout the Analyzer:
+git clone git@github.com:BSM3G/Analyzer.git
+cheout the branch you want:
+
+`cd Analyzer
+git checkout -b nanoAOD`
+
+compile: 
+`make`
+
+If you have problems you might want to compile with debug flags and get the debug symbols in:
+
+make clean; DEBUG=1 make -j8
+
+```
+gdb --args ./Analyzer -in /uscms_data/d3/cfgonzal/ZprimeAnalysis/2017_BSG3G/CMSSW_8_0_10/src/LIST_SAMPLES/ZprimeSamples/OutTree_Zprime3000.root -out test_2.root
+```
+
+then say ```run``` and when it crashes say ```where```
+
 
 If you are setting up the Analyzer, click on the link for respective version
 

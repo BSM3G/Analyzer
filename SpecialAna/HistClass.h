@@ -467,14 +467,14 @@ namespace HistClass {
      * \param[in] value Value that should be filled
      * \param[in] weight Weight of the event that should be filled
      */
-    static void Fill(int n_histo, string name, double value, double weight) {
-        std::unordered_map<std::string, TH1D * >::iterator it = histo.find("h1_"+to_string(n_histo)+"_"+name);
+    static void Fill(int n_histo, std::string name, double value, double weight) {
+      std::unordered_map<std::string, TH1D * >::iterator it = histo.find("h1_"+std::to_string(n_histo)+"_"+name);
         
         //Form("h1_%d_%s", n_histo, name));
         if (it != histo.end()) {
             it->second->Fill(value, weight);
         } else {
-            std::cerr << "(Fill) No hist: " << "h1_"+to_string(n_histo)+"_"+name << " in map " << n_histo <<" size is : "<<  histo.size()<<"   "<<histo.max_size()
+	  std::cerr << "(Fill) No hist: " << "h1_"+std::to_string(n_histo)+"_"+name << " in map " << n_histo <<" size is : "<<  histo.size()<<"   "<<histo.max_size()
  << std::endl;
         }
     }
