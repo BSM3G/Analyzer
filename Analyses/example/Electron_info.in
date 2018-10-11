@@ -30,10 +30,11 @@ PtCut 10.0 9999.9
 DoDiscrByIsolation 1
 IsoSumPtCutValue 0.0 0.4
 
-DoDiscrByVetoID false
-DoDiscrByLooseID false
-DoDiscrByMediumID false
-DoDiscrByTightID 1
+//(0:fail, 1:veto, 2:loose, 3:medium, 4:tight)
+DoDiscrByCBID true
+DiscrByCBID 4
+DoDiscrByHLTID false
+DiscrByHLTID 4
 DoDiscrByHEEPID false
 
 ///---MET TOPOLOGY CUTS---///
@@ -58,10 +59,11 @@ PtCut 10.0 9999.9
 DoDiscrByIsolation 1
 IsoSumPtCutValue 0.0 0.4
 
-DoDiscrByVetoID false
-DoDiscrByLooseID false
-DoDiscrByMediumID false
-DoDiscrByTightID 1
+//(0:fail, 1:veto, 2:loose, 3:medium, 4:tight)
+DoDiscrByCBID true
+DiscrByCBID 4
+DoDiscrByHLTID false
+DiscrByHLTID 4
 DoDiscrByHEEPID false
 
 ///---MET TOPOLOGY CUTS---///

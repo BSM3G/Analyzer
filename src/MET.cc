@@ -6,9 +6,8 @@
 //particle is a objet that stores multiple versions of the particle candidates
 Met::Met(TTree* _BOOM, std::string _GenName,  std::vector<std::string> _syst_names, double _MT2mass) : BOOM(_BOOM), GenName(_GenName), syst_names(_syst_names), MT2mass(_MT2mass)  {
 
-  SetBranch((GenName+"_px").c_str(), mMet[0]);
-  SetBranch((GenName+"_py").c_str(), mMet[1]);
-  SetBranch((GenName+"_pz").c_str(), mMet[2]);
+  SetBranch((GenName+"_pt").c_str(), m_pt);
+  SetBranch((GenName+"_phi").c_str(), m_phi);
 
   systdeltaMEx.resize(syst_names.size());
   systdeltaMEy.resize(syst_names.size());
@@ -31,15 +30,14 @@ Met::Met(TTree* _BOOM, std::string _GenName,  std::vector<std::string> _syst_nam
       systVec.push_back(new TLorentzVector);
   }
   
-
-  if( std::find(syst_names.begin(), syst_names.end(), "MetUncl_Up") != syst_names.end() && _BOOM->GetListOfBranches()->FindObject((GenName+"_UnclEnshiftedPtUp").c_str()) !=0){
-    SetBranch((GenName+"_UnclEnshiftedPtUp").c_str(), MetUnclUp[0]);
-    SetBranch((GenName+"_UnclEnshiftedPhiUp").c_str(), MetUnclUp[1]);
+  if( std::find(syst_names.begin(), syst_names.end(), "MetUncl_Up") != syst_names.end() && _BOOM->GetListOfBranches()->FindObject((GenName+"_MetUnclustEnUpDeltaX").c_str()) !=0){
+    SetBranch((GenName+"_MetUnclustEnUpDeltaX").c_str(), MetUnclUp[0]);
+    SetBranch((GenName+"_MetUnclustEnUpDeltaY").c_str(), MetUnclUp[1]);
     Unclup = std::find(syst_names.begin(), syst_names.end(), "MetUncl_Up") -syst_names.begin();
   }
-  if( std::find(syst_names.begin(), syst_names.end(), "MetUncl_Down") != syst_names.end() && _BOOM->GetListOfBranches()->FindObject((GenName+"_UnclEnshiftedPtDown").c_str()) !=0){
-    SetBranch((GenName+"_UnclEnshiftedPtDown").c_str(), MetUnclDown[0]);
-    SetBranch((GenName+"_UnclEnshiftedPhiDown").c_str(), MetUnclDown[1]);
+  if( std::find(syst_names.begin(), syst_names.end(), "MetUncl_Down") != syst_names.end() && _BOOM->GetListOfBranches()->FindObject((GenName+"_MetUnclustEnUpDeltaY").c_str()) !=0){
+    SetBranch((GenName+"_MetUnclustEnUpDeltaX").c_str(), MetUnclDown[0]);
+    SetBranch((GenName+"_MetUnclustEnUpDeltaY").c_str(), MetUnclDown[1]);
     Uncldown = std::find(syst_names.begin(), syst_names.end(), "MetUncl_Down")- syst_names.begin();
   }
 
@@ -60,10 +58,12 @@ void Met::addP4Syst(TLorentzVector mp4, int syst){
 void Met::init(){
   //cleanup of the particles
   //keep this if there is any ever some need for a unchanged met
-  Reco.SetPxPyPzE(mMet[0],mMet[1],mMet[2],sqrt(pow(mMet[0],2) + pow(mMet[1],2)));
+  Reco.SetPtEtaPhiM(m_pt,0,m_phi,m_pt);
+  
   for(int i=0; i < (int) syst_names.size(); i++) {
-    if(i == Unclup) systVec.at(i)->SetPtEtaPhiE(MetUnclUp[0],0,MetUnclUp[1],MetUnclUp[0]);
-    else if(i == Uncldown) systVec.at(i)->SetPtEtaPhiE(MetUnclDown[0],0,MetUnclDown[1],MetUnclDown[0]);
+    
+    if(i == Unclup) systVec.at(i)->SetPxPyPzE(MetUnclUp[0]+Reco.Px(),MetUnclUp[1]+Reco.Py(),0,sqrt(pow(MetUnclUp[0]+Reco.Px(),2)+pow(MetUnclUp[1]+Reco.Py(),2)));
+    else if(i == Uncldown) systVec.at(i)->SetPxPyPzE(MetUnclDown[0]+Reco.Px(),MetUnclDown[1]+Reco.Py(),0,sqrt(pow(MetUnclDown[0]+Reco.Px(),2)+pow(MetUnclDown[1]+Reco.Py(),2)));
     else if(systVec.at(i) != nullptr) addP4Syst(Reco, i);
     
     fill(systdeltaMEx.begin(), systdeltaMEx.end(), 0);

@@ -18,7 +18,9 @@ TauMatchingDeltaR  0.3
 EtaCut 0. 2.4
 PtCut 30.0
 
-ApplyLooseID 1
+//in 94x there is no loose jet ID anymore
+ApplyLooseID 0
+
 
 RemoveOverlapWithMuon1s 1
 RemoveOverlapWithMuon2s 1
@@ -41,7 +43,8 @@ Tau2MatchingDeltaR 0.3
 
 EtaCut 0. 2.4
 PtCut 30.0
-ApplyLooseID 1
+//in 94x there is no loose jet ID anymore
+ApplyLooseID 0
 
 RemoveOverlapWithMuon1s 1
 RemoveOverlapWithMuon2s 1
@@ -62,7 +65,8 @@ Tau2MatchingDeltaR 0.3
           CentralJet
 ###################################
 
-ApplyLooseID 1
+//in 94x there is no loose jet ID anymore
+ApplyLooseID 0
 PtCut 30.0
 
 RemoveOverlapWithMuon1s 1
@@ -86,7 +90,8 @@ Tau2MatchingDeltaR 0.3
 
 DoDiscrByThisJet 1
 
-ApplyLooseID 1
+//in 94x there is no loose jet ID anymore
+ApplyLooseID 0
 EtaCut 0.0 2.4
 PtCut 30.0
 
@@ -113,7 +118,8 @@ DoDiscrByThisJet 1
 
 EtaCut 0.0 2.4
 PtCut 30.0
-ApplyLooseID 1       
+//in 94x there is no loose jet ID anymore
+ApplyLooseID 0     
 
 RemoveOverlapWithMuon1s 1
 RemoveOverlapWithMuon2s 1

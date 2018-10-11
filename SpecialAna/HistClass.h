@@ -36,13 +36,13 @@
 #endif
 
 namespace HistClass {
-    static std::unordered_map<std::string, TH1D * > histo; /*!< Map of a string and a TH1D histogram, for easy 1D histogram handling. */
-    static std::unordered_map<std::string, TH2D * > histo2; /*!< Map of a string and a TH2D histogram, for easy 2D histogram handling. */
-    static std::unordered_map<std::string, THnSparseD * > histon; /*!< Map of a string and a THnSparseD histogram, for easy nSparse handling. */
-    static std::unordered_map<std::string, TNtupleD * > ttupple; /*!< Map of a string and a TNtupleD histogram, for easy Ntuple handling. */
-    static std::unordered_map<std::string, TTree * > trees; /*!< Map of a string and a TTree histogram, for easy tree handling. */
-    static std::unordered_map<std::string, TEfficiency * > effs; /*!< Map of a string and a TEfficiency container. */
-    static std::unordered_map<std::string, TProfile * > prof; /*!< Map of a string and a TEfficiency container. */
+    static std::unordered_map<std::string, TH1D * > histo; /*!< Map of a std::string and a TH1D histogram, for easy 1D histogram handling. */
+    static std::unordered_map<std::string, TH2D * > histo2; /*!< Map of a std::string and a TH2D histogram, for easy 2D histogram handling. */
+    static std::unordered_map<std::string, THnSparseD * > histon; /*!< Map of a std::string and a THnSparseD histogram, for easy nSparse handling. */
+    static std::unordered_map<std::string, TNtupleD * > ttupple; /*!< Map of a std::string and a TNtupleD histogram, for easy Ntuple handling. */
+    static std::unordered_map<std::string, TTree * > trees; /*!< Map of a std::string and a TTree histogram, for easy tree handling. */
+    static std::unordered_map<std::string, TEfficiency * > effs; /*!< Map of a std::string and a TEfficiency container. */
+    static std::unordered_map<std::string, TProfile * > prof; /*!< Map of a std::string and a TEfficiency container. */
 
     /*! \brief Function to create a number of 1D histograms in the histo map
      *
@@ -468,14 +468,13 @@ namespace HistClass {
      * \param[in] weight Weight of the event that should be filled
      */
     static void Fill(int n_histo, std::string name, double value, double weight) {
-      std::unordered_map<std::string, TH1D * >::iterator it = histo.find("h1_"+std::to_string(n_histo)+"_"+name);
+        std::unordered_map<std::string, TH1D * >::iterator it = histo.find("h1_"+std::to_string(n_histo)+"_"+name);
         
         //Form("h1_%d_%s", n_histo, name));
         if (it != histo.end()) {
             it->second->Fill(value, weight);
         } else {
-	  std::cerr << "(Fill) No hist: " << "h1_"+std::to_string(n_histo)+"_"+name << " in map " << n_histo <<" size is : "<<  histo.size()<<"   "<<histo.max_size()
- << std::endl;
+            std::cerr << "(Fill) No hist: " << "h1_"+std::to_string(n_histo)+"_"+name << " in map " << n_histo <<" size is : "<<  histo.size()<<"   "<<histo.max_size() << std::endl;
         }
     }
 
@@ -708,8 +707,8 @@ namespace HistClass {
      *
      * This function writes all histograms of the map with the
      * default options, otherwise it writes all histograms that
-     * contain the given string in there name.
-     * \param[in] name Optional string that all histogram names that should be written contain (DEFAULT = "")
+     * contain the given std::string in there name.
+     * \param[in] name Optional std::string that all histogram names that should be written contain (DEFAULT = "")
      */
     SUPPRESS_NOT_USED_WARN static void WriteAll(const char * name = "") {
         std::unordered_map<std::string, TH1D * >::iterator it;
@@ -726,8 +725,8 @@ namespace HistClass {
      *
      * This function writes all histograms of the map with the
      * default options, otherwise it writes all histograms that
-     * contain the given string in there name.
-     * \param[in] name Optional string that all histogram names that should be written contain (DEFAULT = "")
+     * contain the given std::string in there name.
+     * \param[in] name Optional std::string that all histogram names that should be written contain (DEFAULT = "")
      */
     SUPPRESS_NOT_USED_WARN static void WriteAll_NonZero(const char * name = "") {
         std::unordered_map<std::string, TH1D * >::iterator it;
@@ -748,8 +747,8 @@ namespace HistClass {
      *
      * This function writes all histograms of the map with the
      * default options, otherwise it writes all histograms that
-     * contain the given string in there name.
-     * \param[in] name Optional string that all histogram names that should be written contain (DEFAULT = "")
+     * contain the given std::string in there name.
+     * \param[in] name Optional std::string that all histogram names that should be written contain (DEFAULT = "")
      */
     SUPPRESS_NOT_USED_WARN static void WriteAll2(const char * name = "") {
         std::unordered_map<std::string, TH2D * >::iterator it;
@@ -780,12 +779,12 @@ namespace HistClass {
      *   //}
     */
 
-    /*! \brief Function split a string at a delimiter
+    /*! \brief Function split a std::string at a delimiter
      *
-     * This function splits a given string at a given delimineter,
+     * This function splits a given std::string at a given delimineter,
      * and pushes the results in a given vector.
      * \param[in] &s String that should be split
-     * \param[in] delim Delimiter where the string should be split
+     * \param[in] delim Delimiter where the std::string should be split
      * \param[in] &elems Vector in which the substrings should be pushed
     */
     SUPPRESS_NOT_USED_WARN void split(const std::string &s, char delim, std::vector<std::string> *elems) {
@@ -796,12 +795,12 @@ namespace HistClass {
         }
     }
 
-    /*! \brief Function split a string at a delimiter and return the results
+    /*! \brief Function split a std::string at a delimiter and return the results
      *
-     * This function splits a given string at a given delimineter,
+     * This function splits a given std::string at a given delimineter,
      * and returns the resulting substrings as a vector.
      * \param[in] &s String that should be split
-     * \param[in] delim Delimiter where the string should be split
+     * \param[in] delim Delimiter where the std::string should be split
      * \param[out] elems Vector in which the substrings were pushed
     */
     SUPPRESS_NOT_USED_WARN std::vector<std::string> split(const std::string &s, char delim) {
@@ -813,7 +812,7 @@ namespace HistClass {
     /*! \brief Function to write many 1D histograms which contain specific strings of the map
      *
      * This function writes all histograms of the map with that
-     * contain the given string in there name. The written histo-
+     * contain the given std::string in there name. The written histo-
      * grams also have to contain a list of strings that are sepe-
      * rated by a ':'.
      * \param[in] name String that all histogram names that should be written contain
@@ -844,7 +843,7 @@ namespace HistClass {
     /*! \brief Function to write many 2D histograms which contain specific strings of the map
      *
      * This function writes all histograms of the map with that
-     * contain the given string in there name. The written histo-
+     * contain the given std::string in there name. The written histo-
      * grams also have to contain a list of strings that are sepe-
      * rated by a ':'.
      * \param[in] name String that all histogram names that should be written contain
@@ -875,7 +874,7 @@ namespace HistClass {
     /*! \brief Function to write many 1D histograms which (not) contain specific strings of the map
      *
      * This function writes all histograms of the map with that
-     * contain the given string in there name. The written histo-
+     * contain the given std::string in there name. The written histo-
      * grams also have to contain a list of strings that are sepe-
      * rated by a ':'. In this version also a list of strings that
      * should not be contained in the histogram name can be given.
@@ -916,7 +915,7 @@ namespace HistClass {
     /*! \brief Function to write many 2D histograms which (not) contain specific strings of the map
      *
      * This function writes all histograms of the map with that
-     * contain the given string in there name. The written histo-
+     * contain the given std::string in there name. The written histo-
      * grams also have to contain a list of strings that are sepe-
      * rated by a ':'. In this version also a list of strings that
      * should not be contained in the histogram name can be given.
@@ -958,8 +957,8 @@ namespace HistClass {
      *
      * This function writes all TTrees and TNtupleDs of the maps
      * with the default options, otherwise it writes all histograms
-     * that contain the given string in there name.
-     * \param[in] name Optional string that all TTrees or TNtupleDs names that should be written contain (DEFAULT = "")
+     * that contain the given std::string in there name.
+     * \param[in] name Optional std::string that all TTrees or TNtupleDs names that should be written contain (DEFAULT = "")
      */
     SUPPRESS_NOT_USED_WARN static void WriteAllTrees(const char * name = "") {
         for (std::unordered_map<std::string, TNtupleD * >::iterator it = ttupple.begin(); it != ttupple.end(); ++it) {
@@ -982,8 +981,8 @@ namespace HistClass {
      *
      * This function writes all nSparses of the map with the
      * default options, otherwise it writes all histograms that
-     * contain the given string in there name.
-     * \param[in] name Optional string that all nSparses names that should be written contain (DEFAULT = "")
+     * contain the given std::string in there name.
+     * \param[in] name Optional std::string that all nSparses names that should be written contain (DEFAULT = "")
      */
     SUPPRESS_NOT_USED_WARN static void WriteN(const char * name = "") {
         std::unordered_map<std::string, THnSparseD * >::iterator it;
@@ -1009,8 +1008,8 @@ namespace HistClass {
      *
      * This function writes all efficiency containers of the map with the
      * default options, otherwise it writes all efficiency containers that
-     * contain the given string in there name.
-     * \param[in] name Optional string that all efficiency containers names that should be written contain (DEFAULT = "")
+     * contain the given std::string in there name.
+     * \param[in] name Optional std::string that all efficiency containers names that should be written contain (DEFAULT = "")
      */
     SUPPRESS_NOT_USED_WARN static void WriteAllEff(const char * name = "") {
         std::unordered_map<std::string, TEfficiency * >::iterator it;
@@ -1026,7 +1025,7 @@ namespace HistClass {
     /*! \brief Function to write many efficiency containers which contain specific strings of the map
      *
      * This function writes all efficiency containers of the map with that
-     * contain the given string in there name. The written efficiencies also have to contain a list of strings that are sepe-
+     * contain the given std::string in there name. The written efficiencies also have to contain a list of strings that are sepe-
      * rated by a ':'.
      * \param[in] name String that all efficiency names that should be written contain
      * \param[in] contains_i String that of names (seperated by ':') that the efficiency name should contain
@@ -1057,8 +1056,8 @@ namespace HistClass {
      *
      * This function writes all profile containers of the map with the
      * default options, otherwise it writes all profile containers that
-     * contain the given string in there name.
-     * \param[in] name Optional string that all profile containers names that should be written contain (DEFAULT = "")
+     * contain the given std::string in there name.
+     * \param[in] name Optional std::string that all profile containers names that should be written contain (DEFAULT = "")
      */
     SUPPRESS_NOT_USED_WARN static void WriteAllProf(const char * name = "") {
         std::unordered_map<std::string, TProfile * >::iterator it;

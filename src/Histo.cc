@@ -108,8 +108,8 @@ outname(rhs.outname), NFolders(rhs.NFolders), isData(rhs.isData), fillSingle(rhs
 
 
 Histogramer::~Histogramer() {
-  if(outfile != nullptr)
-    outfile->Close();
+  //if(outfile != nullptr)
+    //outfile->Close();
 }
 
 
@@ -271,12 +271,13 @@ void Histogramer::fillCRFolderNames(std::string sofar, int index, bool isFirst, 
 }
 
 
-void Histogramer::fill_histogram(std::string subfolder) {
-  if( access( outname.c_str(), F_OK ) == -1 ){
-    outfile = new TFile(outname.c_str(), "RECREATE", outname.c_str(), ROOT::CompressionSettings(ROOT::kLZMA, 9));
-  }else{
-    outfile = new TFile(outname.c_str(), "UPDATE", outname.c_str(), ROOT::CompressionSettings(ROOT::kLZMA, 9));
-  }
+void Histogramer::fill_histogram(TFile* _outfile, std::string subfolder) {
+  //if( access( outname.c_str(), F_OK ) == -1 ){
+    //outfile = new TFile(outname.c_str(), "RECREATE", outname.c_str(), ROOT::CompressionSettings(ROOT::kLZMA, 9));
+  //}else{
+    //outfile = new TFile(outname.c_str(), "UPDATE", outname.c_str(), ROOT::CompressionSettings(ROOT::kLZMA, 9));
+  //}
+  outfile = _outfile;
   if(subfolder!=""){
     outfile->mkdir(subfolder.c_str());
     outfile->cd(subfolder.c_str());
@@ -300,7 +301,7 @@ void Histogramer::fill_histogram(std::string subfolder) {
   for (std::unordered_map<std::string, TTree * >::iterator it = trees.begin(); it != trees.end(); ++it) {
     it->second->Write();
   }
-  outfile->Close();
+  //outfile->Close();
 }
 
 void Histogramer::createTree(std::unordered_map< std::string , float > *m, std::string name){

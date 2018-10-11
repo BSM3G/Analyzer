@@ -75,7 +75,8 @@ protected:
   std::vector<std::string> syst_names;
   double MT2mass;
   
-  double mMet[3] = {0, 0, 0};
+  float m_pt;
+  float m_phi;
   //note this is only for pt and phi
   double MetUnclUp[2] = {0, 0};
   double MetUnclDown[2] = {0, 0};

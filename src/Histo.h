@@ -44,7 +44,7 @@ public:
   void addVal(double, std::string, int, std::string, double);
   void addVal(double, double, std::string, int, std::string, double);
   void addEffiency(std::string,double,bool,int);
-  void fill_histogram(std::string subfolder="");
+  void fill_histogram(TFile* _outfile, std::string subfolder="");
   void setControlRegions();
   void createTree(std::unordered_map< std::string , float >*, std::string);
   void fillTree(std::string);

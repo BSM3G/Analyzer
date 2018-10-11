@@ -39,6 +39,7 @@ struct PartStats {
 
 enum class PType { Electron, Muon, Tau, Jet, FatJet, None};
 
+const Int_t MAXINDEX = 500;
 
 class Particle {
 
@@ -72,7 +73,7 @@ public:
   void addP4Syst(TLorentzVector, int);
   void setOrigReco();
   void setCurrentP(int);
-  std::string getName() {return GenName;};
+  std::string getName() const {return GenName;};
 
   bool findCut(const std::vector<std::string>&, std::string);
   
@@ -94,11 +95,16 @@ protected:
   };
 
  private:
-  std::vector<double>* mpt = 0;
-  std::vector<double>* meta = 0;
-  std::vector<double>* mphi = 0;
-  std::vector<double>* menergy = 0;
-
+  //vector<double>* mpt = 0;
+  //vector<double>* meta = 0;
+  //vector<double>* mphi = 0;
+  //vector<double>* menergy = 0;
+  uint  m_n;
+  float m_pt[MAXINDEX];
+  float m_phi[MAXINDEX];
+  float m_eta[MAXINDEX];
+  float m_mass[MAXINDEX];
+  
   std::vector<TLorentzVector> Reco;
   std::vector<TLorentzVector> *cur_P;
   std::vector<std::string> syst_names;
@@ -112,16 +118,13 @@ public:
   Photon();
   Photon(TTree*, std::string, std::vector<std::string>);
 
-  std::vector<double>* et = 0;
-  std::vector<double>* hoverE = 0;
-  std::vector<double>* phoR = 0;
-  std::vector<double>* sigmaIEtaIEta = 0;
-  std::vector<double>* sigmaIPhiIPhi = 0;
-  std::vector<double>* pfChIso = 0;
-  std::vector<double>* pfPhoIso = 0;
-  std::vector<double>* pfNeuIso = 0;
-  std::vector<bool>*   eleVeto = 0;
-  std::vector<bool>*   hasPixelSeed = 0;
+  float hoverE[MAXINDEX];
+  float phoR[MAXINDEX];
+  float sigmaIEtaIEta[MAXINDEX];
+  float pfIso_all[MAXINDEX];
+  float pfIso_chg[MAXINDEX];
+  bool eleVeto[MAXINDEX];
+  bool hasPixelSeed[MAXINDEX];
 };
 
 
@@ -131,13 +134,12 @@ class Generated : public Particle {
 public:
   Generated();
   Generated(TTree*, std::string, std::vector<std::string>);
-
-  std::vector<double>  *pdg_id = 0;
-  std::vector<double>  *motherpdg_id = 0;
-  std::vector<double>  *status = 0;
-  std::vector<int>  *BmotherIndex = 0;
-  std::vector<double> *numDaught = 0;     //04.22.18
-
+  
+  int  genPartIdxMother[MAXINDEX];
+  int  pdg_id[MAXINDEX];
+  int  status[MAXINDEX];
+  int  statusFlags[MAXINDEX];
+  
 };
 
 /////////////////////////////////////////////////////////////////////////
@@ -149,21 +151,18 @@ public:
   std::vector<CUTS> findExtraCuts();
   std::vector<CUTS> overlapCuts(CUTS);
   bool passedLooseJetID(int);
-  
-  std::vector<double>* neutralHadEnergyFraction = 0;
-  std::vector<double>* neutralEmEmEnergyFraction = 0;
-  std::vector<int>*    numberOfConstituents = 0;
-  std::vector<double>* muonEnergyFraction = 0;
-  std::vector<double>* chargedHadronEnergyFraction = 0;
-  std::vector<int>*    chargedMultiplicity = 0;
-  std::vector<double>* chargedEmEnergyFraction = 0;
-  std::vector<int>*    partonFlavour = 0;
-  std::vector<double>* bDiscriminator = 0;
-  std::vector<double>* tau1 = 0;
-  std::vector<double>* tau2 = 0;
-  std::vector<double>* tau3 = 0;
-  std::vector<double>* PrunedMass = 0;
-  std::vector<double>* SoftDropMass = 0;
+   
+  float area[MAXINDEX];
+  float bDiscriminator[MAXINDEX];
+  float chargedEmEnergyFraction[MAXINDEX];
+  float chargedHadronEnergyFraction[MAXINDEX];
+  float neutralEmEmEnergyFraction[MAXINDEX];
+  float neutralHadEnergyFraction[MAXINDEX];
+  int jetId[MAXINDEX];
+  int nMuons[MAXINDEX];
+  int numberOfConstituents[MAXINDEX];
+  int puID[MAXINDEX];
+  int partonFlavour[MAXINDEX];
 
  protected:
 
@@ -176,12 +175,13 @@ public:
 
   std::vector<CUTS> findExtraCuts();
   std::vector<CUTS> overlapCuts(CUTS);
-
-  std::vector<double>* tau1 = 0;
-  std::vector<double>* tau2 = 0;
-  std::vector<double>* tau3 = 0;
-  std::vector<double>* PrunedMass = 0;
-  std::vector<double>* SoftDropMass = 0;
+  
+  float tau1[MAXINDEX];
+  float tau2[MAXINDEX];
+  float tau3[MAXINDEX];
+  float tau4[MAXINDEX];
+  float PrunedMass[MAXINDEX];
+  float SoftDropMass[MAXINDEX];
 
 };
 
@@ -193,8 +193,7 @@ public:
   std::vector<CUTS> findExtraCuts();
 
   double charge(uint)const;
-  std::vector<double>* _charge = 0;
-
+  int _charge[MAXINDEX];
 
   virtual bool get_Iso(int, double, double) const {return false;}
 };
@@ -205,16 +204,37 @@ public:
   Electron(TTree*, std::string, std::vector<std::string>);
 
   bool get_Iso(int, double, double) const;
+  
+  std::bitset<8> cbIDele1;
+  std::bitset<8> cbIDele2;
+  std::bitset<8> cbHLTIDele1;
+  std::bitset<8> cbHLTIDele2;
+ 
+  // Electron MVA ID fall 2017 
+  float miniPFRelIso_all[MAXINDEX];
+  float miniPFRelIso_chg[MAXINDEX];
+  float mvaFall17Iso[MAXINDEX];
+  float mvaFall17noIso[MAXINDEX];
+  float pfRelIso03_all[MAXINDEX];
+  float pfRelIso03_chg[MAXINDEX];
+  int cutBased[MAXINDEX];
+  bool cutBased_HLTPreSel[MAXINDEX];
+  bool mvaIso_90[MAXINDEX];
+  bool mvanoIso_WP90[MAXINDEX];
+  bool mvaIso_80[MAXINDEX];
+  bool mvanoIso_WP80[MAXINDEX];
+  bool mvaIso_WPL[MAXINDEX];
+  bool mvanoIso_WPL[MAXINDEX];
+  bool isPassHEEPId[MAXINDEX];
 
-  std::vector<int>     *isPassVeto = 0;
-  std::vector<int>     *isPassLoose = 0;
-  std::vector<int>     *isPassMedium = 0;
-  std::vector<int>     *isPassTight = 0;
-  std::vector<int>     *isPassHEEPId = 0;
-  std::vector<double>  *isoChargedHadrons = 0;
-  std::vector<double>  *isoNeutralHadrons = 0;
-  std::vector<double>  *isoPhotons = 0;
-  std::vector<double>  *isoPU = 0;
+  // Electron MVA ID spring 2016
+  float mvaSpring16GP[MAXINDEX];
+  float mvaSpring16HZZ[MAXINDEX];
+  bool mvaGP_90[MAXINDEX];
+  bool mvaGP_80[MAXINDEX];
+  bool mvaHZZ_WPL[MAXINDEX];
+  bool mvaTTH[MAXINDEX];
+
 };
 
 
@@ -226,12 +246,13 @@ public:
 
   bool get_Iso(int, double, double) const;
 
-  std::vector<bool>* tight = 0;
-  std::vector<bool>* soft = 0;
-  std::vector<double>* isoCharged = 0;
-  std::vector<double>* isoNeutralHadron = 0;
-  std::vector<double>* isoPhoton = 0;
-  std::vector<double>* isoPU = 0;
+  bool tight[MAXINDEX];
+  bool soft[MAXINDEX];
+  float miniPFRelIso_all[MAXINDEX];
+  float miniPFRelIso_chg[MAXINDEX];
+  float pfRelIso03_all[MAXINDEX];
+  float pfRelIso03_chg[MAXINDEX];
+  float pfRelIso04_all[MAXINDEX];
 };
 
 class Taus : public Lepton {
@@ -244,19 +265,41 @@ public:
   bool get_Iso(int, double, double) const;
   bool pass_against_Elec(CUTS, int);
   bool pass_against_Muon(CUTS, int);
-
-  std::vector<int>     *decayModeFindingNewDMs = 0;
-  std::vector<int>     *decayModeFinding = 0;
-  std::vector<double>  *nProngs = 0;
-  std::vector<int>  *decayMode = 0;
-  std::pair<std::vector<int>*,std::vector<int>* > againstElectron = std::make_pair(nullptr,nullptr);
-  std::pair<std::vector<int>*,std::vector<int>* > againstMuon = std::make_pair(nullptr,nullptr);
-  std::pair<std::vector<int>*,std::vector<int>* > minIso = std::make_pair(nullptr,nullptr);
-  std::pair<std::vector<int>*,std::vector<int>* > maxIso = std::make_pair(nullptr,nullptr);
-  std::vector<double>  *leadChargedCandPt = 0;
-  std::vector<double>  *leadChargedCandPtError = 0;
-  std::vector<double>  *leadChargedCandValidHits = 0;
-  std::vector<double>  *leadChargedCandDz_pv = 0;
+  
+  std::bitset<8> tau1minIso;
+  std::bitset<8> tau1maxIso;
+  
+  std::bitset<8> tau2minIso;
+  std::bitset<8> tau2maxIso;
+  
+  std::bitset<8> tau1ele;
+  std::bitset<8> tau1mu;
+  
+  std::bitset<8> tau2ele;
+  std::bitset<8> tau2mu;
+  
+  
+  UChar_t againstElectron[MAXINDEX];
+  UChar_t againstMuon[MAXINDEX];
+  bool DecayMode[MAXINDEX];
+  bool DecayModeNewDMs[MAXINDEX];
+  //uint8_t Tau_idMVAnewDM2017v2[MAXINDEX];
+  UChar_t MVAoldDM[MAXINDEX];
+  UChar_t MVAnewDM[MAXINDEX];
+  //uint8_t Tau_idMVAoldDM2017v1[MAXINDEX];
+  //uint8_t Tau_idMVAoldDM2017v2[MAXINDEX];
+  //uint8_t Tau_idMVAoldDMdR032017v2[MAXINDEX];
+   
+  int decayMode[MAXINDEX];
+  float leadTkDeltaEta[MAXINDEX];
+  float leadTkDeltaPhi[MAXINDEX];
+  float leadTkPtOverTauPt[MAXINDEX];
+  float dz[MAXINDEX];
+  float dxy[MAXINDEX];
+  float chargedIsoPtSum[MAXINDEX];
+  float neutralIso[MAXINDEX];
+  float puCorr[MAXINDEX];
+  
 };
 
 

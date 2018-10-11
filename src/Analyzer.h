@@ -50,6 +50,7 @@ class Analyzer {
 public:
   Analyzer(std::vector<std::string>, std::string, bool setCR = false, std::string configFolder="PartDet");
   ~Analyzer();
+  void add_metadata(std::vector<std::string> infiles);
   void clear_values();
   void preprocess(int);
   bool fillCuts(bool);
@@ -92,6 +93,7 @@ public:
 
   void read_info(std::string);
   void setupGeneral();
+  void branchException(std::string);
   void initializeTrigger();
   void setCutNeeds();
 
@@ -119,7 +121,7 @@ public:
   void getGoodDiJets(const PartStats&, const int);
 
   void VBFTopologyCut(const PartStats&, const int);
-  void TriggerCuts(std::vector<int>&, const std::vector<std::string>&, CUTS);
+  void TriggerCuts(CUTS);
 
 
   double calculateLeptonMetMt(const TLorentzVector&);
@@ -164,11 +166,15 @@ public:
   TChain* BOOM;
   TTree* BAAM;
   TFile* infoFile;
+  TFile* routfile;
   std::string filespace = "";
   double hPU[200];
   double hPU_up[200];
   double hPU_down[200];
   int version=0;
+  std::map<std::string,TTree* > otherTrees;
+  //std::map<std::string,*TObject> otherObjects;
+  
 
   Generated* _Gen;
   Electron* _Electron;
@@ -213,7 +219,8 @@ public:
 
   std::vector<int>* trigPlace[nTrigReq];
   bool setTrigger = false;
-  std::vector<std::string>* trigName[nTrigReq];
+  std::vector<std::string> trigNames;
+  std::vector<bool*> trig_decision;
   std::vector<int> cuts_per, cuts_cumul;
 
   std::unordered_map< std::string,float > zBoostTree;
@@ -222,12 +229,9 @@ public:
   int leadIndex, maxCut, crbins=1;
   bool isData, CalculatePUSystematics, doSystematics;
 
-  std::vector<int>* Trigger_decision = 0;
-  std::vector<int>* Trigger_decisionV1 = 0;
-  std::vector<std::string>* Trigger_names = 0;
   float nTruePU = 0;
   int bestVertices = 0;
-  double gen_weight = 0;
+  float gen_weight = 0;
 
   BTagCalibration calib = BTagCalibration("csvv1", "Pileup/btagging.csv");
   BTagCalibrationReader reader = BTagCalibrationReader(BTagEntry::OP_TIGHT, "central");

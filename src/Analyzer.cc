@@ -1,4 +1,5 @@
 #include "Analyzer.h"
+#include "Compression.h"
 #include <regex>
 
 
@@ -12,8 +13,8 @@
 
 ///// Macros defined to shorten code.  Made since lines used A LOT and repeative.  May change to inlines
 ///// if tests show no loss in speed
-#define histAddVal2(val1, val2, name) ihisto.addVal(val1, val2, group, max, name, wgt)
-#define histAddVal(val, name) ihisto.addVal(val, group, max, name, wgt)
+#define histAddVal2(val1, val2, name) ihisto.addVal(val1, val2, group, max, name, wgt);
+#define histAddVal(val, name) ihisto.addVal(val, group, max, name, wgt);
 #define SetBranch(name, variable) BOOM->SetBranchStatus(name, 1);  BOOM->SetBranchAddress(name, &variable);
 
 typedef std::vector<int>::iterator vec_iter;
@@ -79,8 +80,11 @@ const std::unordered_map<std::string, CUTS> Analyzer::cut_num = {
 ///Constructor
 Analyzer::Analyzer(std::vector<std::string> infiles, std::string outfile, bool setCR, std::string configFolder) : goodParts(getArray()), genName_regex(".*([A-Z][^[:space:]]+)"){
   std::cout << "setup start" << std::endl;
+  
+  routfile = new TFile(outfile.c_str(), "RECREATE", outfile.c_str(), ROOT::CompressionSettings(ROOT::kLZMA, 9));
+  add_metadata(infiles);
 
-  BOOM= new TChain("TNT/BOOM");
+  BOOM= new TChain("Events");
   infoFile=0;
 
   for( std::string infile: infiles){
@@ -91,30 +95,33 @@ Analyzer::Analyzer(std::vector<std::string> infiles, std::string outfile, bool s
   nentries = (int) BOOM->GetEntries();
   BOOM->SetBranchStatus("*", 0);
   std::cout << "TOTAL EVENTS: " << nentries << std::endl;
+  //std::cout <<"----------------------------------------------"<<std::endl;
 
+  //std::cout<<"srand(0)"<< std::endl;
   srand(0);
-
-  for(int i=0; i < nTrigReq; i++) {
-    std::vector<int>* tmpi = new std::vector<int>();
-    std::vector<std::string>* tmps = new std::vector<std::string>();
-    trigPlace[i] = tmpi;
-    trigName[i] = tmps;
-  }
-
+  
+  //std::cout<<"filespace=configFolder"<<std::endl;
   filespace=configFolder;
+  //std::cout<<"filespace+=/"<< std::endl;
   filespace+="/";
-
+  //std::cout<<"setupGeneral();"<< std::endl;
   setupGeneral();
-
+  //isData = distats["Run"].bfind("isData");
+  //std::cout<<"reader.load(calib, BTagEntry::FLAV_B, comb);"<<std::endl;
   reader.load(calib, BTagEntry::FLAV_B, "comb");
 
-  isData = distats["Run"].bfind("isData");
-
+  
+  //std::cout<<"CalculatePUSystematics..."<<std::endl;
   CalculatePUSystematics = distats["Run"].bfind("CalculatePUSystematics");
+  //std::cout<<"initializePileupInfo..."<<std::endl;
   initializePileupInfo(distats["Run"].smap.at("MCHistos"), distats["Run"].smap.at("DataHistos"),distats["Run"].smap.at("DataPUHistName"),distats["Run"].smap.at("MCPUHistName"));
+  //std::cout<<"syst_names.push_back(orig)"<<std::endl;
   syst_names.push_back("orig");
+  //std::cout<<"unordered_map<CUTS tmp;"<<std::endl;
   std::unordered_map<CUTS, std::vector<int>*, EnumHash> tmp;
+  //std::cout<<"syst_parts.push_back(tmp)"<<std::endl;
   syst_parts.push_back(tmp);
+  //std::cout<<"if isData Systematics useSystematics..."<<std::endl;
   if(!isData && distats["Systematics"].bfind("useSystematics")) {
     for(auto systname : distats["Systematics"].bset) {
       if( systname == "useSystematics")
@@ -127,12 +134,15 @@ Analyzer::Analyzer(std::vector<std::string> infiles, std::string outfile, bool s
   }else {
     doSystematics=false;
   }
+
   _Electron = new Electron(BOOM, filespace + "Electron_info.in", syst_names);
   _Muon     = new Muon(BOOM, filespace + "Muon_info.in", syst_names);
   _Tau      = new Taus(BOOM, filespace + "Tau_info.in", syst_names);
   _Jet      = new Jet(BOOM, filespace + "Jet_info.in", syst_names);
   _FatJet   = new FatJet(BOOM, filespace + "FatJet_info.in", syst_names);
-  _MET      = new Met(BOOM, "Met_type1PF" , syst_names, distats["Run"].dmap.at("MT2Mass"));
+  _MET      = new Met(BOOM, "MET" , syst_names, distats["Run"].dmap.at("MT2Mass"));
+
+  //std::cout<<"---------------------------------------------------"<<std::endl;
 
   if(!isData) {
     std::cout<<"This is MC if not, change the flag!"<<std::endl;
@@ -179,7 +189,7 @@ Analyzer::Analyzer(std::vector<std::string> infiles, std::string outfile, bool s
     }
   }
   //we update the root file if it exist so now we have to delete it:
-  std::remove(outfile.c_str()); // delete file
+  //std::remove(outfile.c_str()); // delete file
   histo = Histogramer(1, filespace+"Hist_entries.in", filespace+"Cuts.in", outfile, isData, cr_variables);
   if(doSystematics)
     syst_histo=Histogramer(1, filespace+"Hist_syst_entries.in", filespace+"Cuts.in", outfile, isData, cr_variables,syst_names);
@@ -239,6 +249,53 @@ Analyzer::Analyzer(std::vector<std::string> infiles, std::string outfile, bool s
 
   std::cout << "setup complete" << std::endl << std::endl;
   start = std::chrono::system_clock::now();
+}
+
+void Analyzer::add_metadata(std::vector<std::string> infiles){
+  
+  std::cout<<"Start copying the essentials."<<std::endl;
+  for( std::string infile: infiles){
+    std::cout<<infile<<std::endl;
+    //TFile rfile(infile.c_str());
+    TFile* rfile = TFile::Open(infile.c_str());
+    routfile->cd();
+    for(const auto&& k: *rfile->GetListOfKeys()){
+      std::string kn(k->GetName());
+      std::cout<<kn<<std::endl;
+      if (kn == "Events"){
+        TTree* t= ((TTree*) rfile->Get(kn.c_str()));
+        t->SetBranchStatus("*",0);
+        t->SetBranchStatus("run",1);
+        otherTrees[kn] = t->CopyTree("1","",1);
+      }else if(kn == "MetaData" or kn== "ParameterSets"){
+        otherTrees[kn] = ((TTree*) rfile->Get(kn.c_str()))->CopyTree("1");
+      }else if(kn == "LuminosityBlocks" or kn == "Runs"){
+        otherTrees[kn] = ((TTree*) rfile->Get(kn.c_str()))->CopyTree("1");
+        //else:
+            //_isRun = (kn=="Runs")
+            //_it = inputFile.Get(kn)
+            //_ot = _it.CloneTree(0)
+            //for ev in _it:
+                //if (jsonFilter.filterRunOnly(ev.run) if _isRun else jsonFilter.filterRunLumi(ev.run,ev.luminosityBlock)): _ot.Fill()
+            //self._otherTrees[kn] = _ot
+      }else if( std::string(k->ClassName()) == "TTree"){
+        std::cout<<"Not copying unknown tree kn"<<std::endl;
+      }else{
+        //otherObjects[kn] = rfile.Get(kn)
+      }
+    }
+    routfile->cd();
+    for(auto t : otherTrees){
+      t.second->Write();
+    }
+    rfile->Close();
+    delete rfile;
+  }
+  
+  std::cout<<"Finished copying the essentials."<<std::endl;
+  //for on,ov in self._otherObjects.iteritems():
+    //self._file.WriteTObject(ov,on)
+
 }
 
 std::unordered_map<CUTS, std::vector<int>*, EnumHash> Analyzer::getArray() {
@@ -372,11 +429,6 @@ Analyzer::~Analyzer() {
     it=nullptr;
   }
 
-  for(int i=0; i < nTrigReq; i++) {
-    delete trigPlace[i];
-    delete trigName[i];
-  }
-
 }
 
 
@@ -397,14 +449,6 @@ void Analyzer::clear_values() {
     std::cout<<"New file!"<<std::endl;
     infoFile=BOOM->GetFile();
   }
-  if(version==1 && infoFile!=BOOM->GetFile()){
-    std::cout<<"New file! Will get the trigger info."<<std::endl;
-    infoFile=BOOM->GetFile();
-    BAAM= (TTree*) infoFile->Get("TNT/BAAM");
-    initializeTrigger();
-    infoFile->Close();
-  }
-
 
   leadIndex=-1;
   maxCut = 0;
@@ -412,7 +456,10 @@ void Analyzer::clear_values() {
 
 ///Function that does most of the work.  Calculates the number of each particle
 void Analyzer::preprocess(int event) {
-  BOOM->GetEntry(event);
+  int test= BOOM->GetEntry(event);
+  if(test<0){
+    std::cout << "Could not read the event from the following file: "<<BOOM->GetFile()->GetNewUrl().Data() << std::endl;
+  }
   for(Particle* ipart: allParticles){
     ipart->init();
   }
@@ -467,8 +514,8 @@ void Analyzer::preprocess(int event) {
     //---END MY APPLICATION OF BOOST WEIGHTS---------------------------------------
   //////Triggers and Vertices
   active_part->at(CUTS::eRVertex)->resize(bestVertices);
-  TriggerCuts(*(trigPlace[0]), *(trigName[0]), CUTS::eRTrig1);
-  TriggerCuts(*(trigPlace[1]), *(trigName[1]), CUTS::eRTrig2);
+  //TriggerCuts(*(trigPlace[0]), *(trigName[0]), CUTS::eRTrig1);
+  TriggerCuts( CUTS::eRTrig1);
 
   ////check update met is ok
   for(size_t i=0; i < syst_names.size(); i++) {
@@ -495,7 +542,7 @@ void Analyzer::preprocess(int event) {
     ( event < 10000 && event % 1000 == 0 ) ||
     ( event >= 10000 && event % 10000 == 0 ) ) {
        std::cout << std::setprecision(2)<<event << " Events analyzed "<< static_cast<double>(event)/nentries*100. <<"% done"<<std::endl;
-       std::cout << std::fixed;
+       std::cout << std::setprecision(5);
   }
 }
 
@@ -724,13 +771,14 @@ void Analyzer::printCuts() {
       std::cout << std::endl;
     }
   }
+  std::cout <<std::setprecision(5);
   std::cout << "---------------------------------------------------------------------------\n";
 
   //write all the histograms
   //attention this is not the fill_histogram method from the Analyser
-  histo.fill_histogram();
+  histo.fill_histogram(routfile);
   if(doSystematics)
-    syst_histo.fill_histogram();
+    syst_histo.fill_histogram(routfile);
 
 }
 
@@ -746,7 +794,7 @@ bool Analyzer::select_mc_background(){
     TLorentzVector lep1;
     TLorentzVector lep2;
     for(size_t i=0; i<_Gen->size(); i++){
-      if(abs(_Gen->pdg_id->at(i))==11 or abs(_Gen->pdg_id->at(i))==13 or abs(_Gen->pdg_id->at(i))==15){
+      if(abs(_Gen->pdg_id[i])==11 or abs(_Gen->pdg_id[i])==13 or abs(_Gen->pdg_id[i])==15){
         if(lep1!=TLorentzVector(0,0,0,0)){
           lep2= _Gen->p4(i);
           return (lep1+lep2).M()<200;
@@ -761,7 +809,7 @@ bool Analyzer::select_mc_background(){
     TLorentzVector lep1;
     TLorentzVector lep2;
     for(size_t i=0; i<_Gen->size(); i++){
-      if(abs(_Gen->pdg_id->at(i))==11 or abs(_Gen->pdg_id->at(i))==13 or abs(_Gen->pdg_id->at(i))==15){
+      if(abs(_Gen->pdg_id[i])==11 or abs(_Gen->pdg_id[i])==13 or abs(_Gen->pdg_id[i])==15){
         if(lep1!=TLorentzVector(0,0,0,0)){
           lep2= _Gen->p4(i);
           return (lep1+lep2).M()<100;
@@ -889,6 +937,13 @@ void Analyzer::updateMet(int syst) {
 //   }
 // }
 
+/////Check if a given branch is not found in the file
+
+void Analyzer::branchException(std::string branch){
+  if(BOOM->FindBranch(branch.c_str()) == 0 ){
+     throw "Branch not found in the current sample. Check the config files associated to this branch.";
+  }
+}
 
 /////sets up other values needed for analysis that aren't particle specific
 void Analyzer::setupGeneral() {
@@ -899,11 +954,36 @@ void Analyzer::setupGeneral() {
     {15, new GenFill(2, CUTS::eGTau)},    {23, new GenFill(62, CUTS::eGZ)},
     {24, new GenFill(62, CUTS::eGW)},      {24, new GenFill(52, CUTS::eGHadW)}, {5, new GenFill{52, CUTS::eGBJet}}, {25, new GenFill(2, CUTS::eGHiggs)} //05.21.18 07.25.18
   };//Changed on 05.15.18 to clean TT inclusive.  We needed the W's with status 52 according to the particle decay lists. //07.25.18
+  
+  isData=true;
+  if(BOOM->FindBranch("Pileup_nTrueInt")!=0){
+    isData=false;
+  }
+  if(!isData){
+    SetBranch("Pileup_nTrueInt", nTruePU);
+    SetBranch("genWeight", gen_weight);
+    //SetBranch("rho", rho);
+  }else{
+    nTruePU=0;
+    gen_weight=0;
+  }
 
-  SetBranch("nTruePUInteractions", nTruePU);
-  SetBranch("bestVertices", bestVertices);
-  SetBranch("weightevt", gen_weight);
-  //SetBranch("rho", rho);
+  //if(BOOM->FindBranch("Electron_mvaFall17Iso")!=0){
+  //  std::cout<<"This file needs the new version of the analyzer"<<std::endl;
+  //} 
+  
+  for( int i=0; i<BOOM->GetListOfBranches()->GetSize(); i++){
+    std::string branch_name(BOOM->GetListOfBranches()->At(i)->GetName());
+    //if (branch_name.find("Electron_mva")!=std::string::npos){
+      //std::cout<< branch_name << std::endl;
+    //}
+    //std::cout<<"--------------------------------------------------"<<std::endl;
+    //if (branch_name.find("HLT_Double")!=std::string::npos){
+      //std::cout<< branch_name << std::endl;
+    //}
+  }
+  
+  SetBranch("PV_npvs", bestVertices);
 
   read_info(filespace + "ElectronTau_info.in");
   read_info(filespace + "MuonTau_info.in");
@@ -913,53 +993,52 @@ void Analyzer::setupGeneral() {
   read_info(filespace + "VBFCuts_info.in");
   read_info(filespace + "Run_info.in");
   read_info(filespace + "Systematics_info.in");
+  
+  for(std::string trigger : trigNames){
+    bool decison=false;
+    //std::cout<< "Trigger: "<< trigger<<std::endl;
+    
+   for( int i=0; i<BOOM->GetListOfBranches()->GetSize(); i++){
+	   std::string branch_name(BOOM->GetListOfBranches()->At(i)->GetName());
+	   if (branch_name.find("HLT_")!=std::string::npos){
+           	std::cout<< branch_name << std::endl;
+	   }
+   }
 
-  if( BOOM->GetListOfBranches()->FindObject("Trigger_names") ==0){
-    SetBranch("Trigger_decision", Trigger_decisionV1);
-    infoFile=BOOM->GetFile();
-    BAAM= (TTree*) infoFile->Get("TNT/BAAM");
-    initializeTrigger();
-    infoFile->Close();
-    version=1;
-  }else{
-    SetBranch("Trigger_names", Trigger_names);
-    SetBranch("Trigger_decision", Trigger_decision);
-    BOOM->GetEntry(0);
-    for(int i = 0; i < nTrigReq; i++) {
-      for(int j = 0; j < (int)trigName[i]->size(); j++) {
-        for(int k = 0; k < (int)Trigger_names->size(); k++) {
-          if(Trigger_names->at(k).find(trigName[i]->at(j)) != std::string::npos) {
-            // structure: i tigger 1 or 2 | j  name of trigger in trigger one or two
-            trigPlace[i]->at(j) = k;
-            break;
-          }
+/*
+    if(BOOM->FindBranch(trigger.c_str()) == 0){
+      std::cout<<"ERROR! Trigger "<< trigger << ": Branch not found in this sample. Check the config files associated to this branch." << std::endl;
+      std::exit(1);
+      //std::cout<<"FindBranch("<< trigger << ") = "<< BOOM->FindBranch(trigger.c_str()) << std::endl;
+      //  throw "Please check the name of the trigger you are applying.";
+    }
+    SetBranch(trigger.c_str(),decison);       
+    trig_decision.push_back(decison);
+*/
+    
+    try{
+       branchException(trigger.c_str());
+    }
+
+    catch (const char* msg){
+      std::cout << "ERROR! Trigger " << trigger << ": "  << msg << std::endl;
+      std::cout<< "options are:" << std::endl;
+      for( int i=0; i<BOOM->GetListOfBranches()->GetSize(); i++){
+        std::string branch_name(BOOM->GetListOfBranches()->At(i)->GetName());
+        if (branch_name.find("HLT_")!=std::string::npos){
+          std::cout<< branch_name << std::endl;
         }
       }
+      continue;
+      //std::exit(1);
     }
-    BOOM->SetBranchStatus("Trigger_names", 0);
+
+    SetBranch(trigger.c_str(),decison);       
+    trig_decision.push_back(&decison);
+    
   }
 }
 
-
-//get the correct trigger position:
-void Analyzer::initializeTrigger() {
-  BAAM->SetBranchStatus("triggernames", 1);
-  BAAM->SetBranchAddress("triggernames", &Trigger_names);
-
-  BAAM->GetEntry(0);
-  for(int i = 0; i < nTrigReq; i++) {
-    for(int j = 0; j < (int)trigName[i]->size(); j++) {
-      for(int k = 0; k < (int)Trigger_names->size(); k++) {
-        if(Trigger_names->at(k).find(trigName[i]->at(j)) != std::string::npos) {
-          trigPlace[i]->at(j) = k;
-          //std::cout << "Trigger_names->at(k): " << Trigger_names->at(k) << std::endl;
-          break;
-        }
-      }
-    }
-  }
-  BAAM->SetBranchStatus("triggernames", 0);
-}
 
 void Analyzer::initializeMCSelection(std::vector<std::string> infiles) {
     // check if we need to make gen level cuts to cross clean the samples:
@@ -1028,27 +1107,50 @@ void Analyzer::read_info(std::string filename) {
       std::cout << "error in " << filename << "; no groups specified for data" << std::endl;
       exit(1);
     } else if(stemp.size() == 2) {
-      if(stemp.at(0).find("Trigger") != std::string::npos) {
-        int ntrig = (stemp.at(0).find("1") != std::string::npos) ? 0 : 1;
-        trigName[ntrig]->push_back(stemp.at(1));
-        trigPlace[ntrig]->push_back(0);
-        continue;
-      }
-
       char* p;
       strtod(stemp[1].c_str(), &p);
       if(group.compare("Control_Region") !=0 ){
-        if(stemp[1] == "1" || stemp[1] == "true") distats[group].bset.push_back(stemp[0]);
+        if(stemp[1] == "1" || stemp[1] == "true"){
+          distats[group].bset.push_back(stemp[0]);
+          if(stemp[1] == "1" ){
+            distats[group].dmap[stemp[0]]=std::stod(stemp[1]);
+          }
+        }
         else if(*p) distats[group].smap[stemp[0]] = stemp[1];
-        else  distats[group].dmap[stemp[0]]=stod(stemp[1]);
+        else  distats[group].dmap[stemp[0]]=std::stod(stemp[1]);
       }else{
         if(*p) distats[group].smap[stemp[0]] = stemp[1];
-        else  distats[group].dmap[stemp[0]]=stod(stemp[1]);
+        else  distats[group].dmap[stemp[0]]=std::stod(stemp[1]);
       }
-
-    } else if(stemp.size() == 3) distats[group].pmap[stemp[0]] = std::make_pair(stod(stemp[1]), stod(stemp[2]));
+      if(stemp.at(0).find("Trigger") != std::string::npos) {
+        for(auto trigger : stemp){
+          if(trigger.find("Trigger")== std::string::npos and "="!=trigger ){
+            trigNames.push_back(trigger);
+          }
+        }
+        continue;
+      }
+    } else if(stemp.size() == 3 and stemp.at(0).find("Trigger") == std::string::npos){
+      distats[group].pmap[stemp[0]] = std::make_pair(std::stod(stemp[1]), std::stod(stemp[2]));
+    } else{
+      if(stemp.at(0).find("Trigger") != std::string::npos) {
+        for(auto trigger : stemp){
+          if(trigger.find("Trigger")== std::string::npos and "="!=trigger ){
+            trigNames.push_back(trigger);
+          }
+        }
+        continue;
+      }
+    }
   }
   info_file.close();
+  //for( std::pair<const std::basic_string<char>, PartStats> group : distats){
+    //for( std::pair<const std::basic_string<char>, double> i : group.second.dmap){
+      //if(group.first.find("Tau")!=string::npos){
+        //cout<<group.first<<" "<< i.first<< "  "<<i.second<<std::endl;
+      //}
+    //}
+  //}
 }
 
 
@@ -1223,7 +1325,7 @@ TLorentzVector Analyzer::matchLeptonToGen(const TLorentzVector& lvec, const Part
   }
   for(auto it : *active_part->at(ePos)) {
     if(lvec.DeltaR(_Gen->p4(it)) <= stats.dmap.at("GenMatchingDeltaR")) {
-      if(stats.bfind("UseMotherID") && abs(_Gen->motherpdg_id->at(it)) != stats.dmap.at("MotherID")) continue;
+      if(stats.bfind("UseMotherID") && abs(_Gen->pdg_id[_Gen->genPartIdxMother[it]]) != stats.dmap.at("MotherID")) continue;
       return _Gen->p4(it);
     }
   }
@@ -1255,7 +1357,7 @@ TLorentzVector Analyzer::matchJetToGen(const TLorentzVector& lvec, const PartSta
   for(auto it : *active_part->at(ePos)) {
     if(lvec.DeltaR(_Gen->p4(it)) <= stats.dmap.at("GenMatchingDeltaR")) {
       //nothing more than b quark or gluon
-      if( !(abs(_Gen->pdg_id->at(it))<5 || _Gen->pdg_id->at(it)==9 ||  _Gen->pdg_id->at(it)==21) ) continue;
+      if( !( (abs(_Gen->pdg_id[it])<5) || (abs(_Gen->pdg_id[it])==9) ||  (abs(_Gen->pdg_id[it])==21) ) ) continue;
       return _Gen->p4(it);
     }
   }
@@ -1272,14 +1374,14 @@ int Analyzer::matchToGenPdg(const TLorentzVector& lvec, double minDR) {
 
     if(lvec.DeltaR(_Gen->p4(i)) <=_minDR) {
       //only hard interaction
-      if( _Gen->status->at(i)<10){
+      if( _Gen->status[i]<10){
         found=i;
         _minDR=lvec.DeltaR(_Gen->p4(i));
       }
     }
   }
   if (found>=0){
-    return _Gen->pdg_id->at(found);
+    return _Gen->pdg_id[found];
   }
   return 0;
 }
@@ -1293,8 +1395,8 @@ void Analyzer::getGoodGen(const PartStats& stats) {
     //if(_Gen->status->at(j)>10){
       //continue;
     //}
-    int id = abs(_Gen->pdg_id->at(j));
-    if(genMaper.find(id) != genMaper.end() && _Gen->status->at(j) == genMaper.at(id)->status) {
+    int id = abs(_Gen->pdg_id[j]);
+    if(genMaper.find(id) != genMaper.end() && _Gen->status[j] == genMaper.at(id)->status) {
       if(id == 15 && (_Gen->pt(j) < stats.pmap.at("TauPtCut").first || _Gen->pt(j) > stats.pmap.at("TauPtCut").second || abs(_Gen->eta(j)) > stats.dmap.at("TauEtaCut"))) continue;
       if(id == 15 && abs(_Gen->motherpdg_id->at(j)) != 24) continue;
       if(id == 24 && abs(_Gen->status->at(j)) == 47) continue; //Changed on 05.15.18 to clean TT inclusive.  Talked to Klaas- GenW wasn't filling b/c we were explicitly requiring status 2 or 62.  The W's from TTbar have status 52 once the momentum is corrected.  He said we should just fill with everything that is not status 47.  Status 47 is W or Z from shower.
@@ -1302,7 +1404,7 @@ void Analyzer::getGoodGen(const PartStats& stats) {
       active_part->at(genMaper.at(id)->ePos)->push_back(j);
     }
     //something special for jet
-    if( (id<5 || id==9 ||  id==21) && genMaper.find(id) != genMaper.end() && _Gen->status->at(j) == genMaper.at(5)->status) {
+    if( (id<5 || id==9 ||  id==21) && genMaper.find(id) != genMaper.end() && _Gen->status[j] == genMaper.at(5)->status) {
       active_part->at(genMaper.at(5)->ePos)->push_back(j);
     }
   }
@@ -1335,10 +1437,11 @@ void Analyzer::getGoodTauNu() {
     bool leptonDecay = false;
     int nu = -1;
     for(size_t j = 0; j < _Gen->size(); j++) {
-      if(abs(_Gen->BmotherIndex->at(j)) == (it)) {
-        if( (abs(_Gen->pdg_id->at(j)) == 16) && (abs(_Gen->motherpdg_id->at(j)) == 15) && (_Gen->status->at(_Gen->BmotherIndex->at(j)) == 2) ) nu = j;
-        else if( (abs(_Gen->pdg_id->at(j)) == 12) || (abs(_Gen->pdg_id->at(j)) == 14) ) leptonDecay = true;
-      }
+      //if(abs(_Gen->BmotherIndex->at(j)) == (it)) {
+        //if( (abs(_Gen->pdg_id->at(j)) == 16) && (abs(_Gen->motherpdg_id->at(j)) == 15) && (_Gen->status->at(_Gen->BmotherIndex->at(j)) == 2) ) nu = j;
+        if( (abs(_Gen->pdg_id[j]) == 16) && (abs(_Gen->pdg_id[_Gen->genPartIdxMother[j]]) == 15) ) nu = j;
+        else if( (abs(_Gen->pdg_id[j]) == 12) || (abs(_Gen->pdg_id[j]) == 14) ) leptonDecay = true;
+      //}
     }
     nu = (leptonDecay) ? -1 : nu;
     active_part->at(CUTS::eNuTau)->push_back(nu);
@@ -1443,22 +1546,35 @@ void Analyzer::getGoodRecoLeptons(const Lepton& lep, const CUTS ePos, const CUTS
       else if(cut == "DiscrByMetMt") passCuts = passCuts && passCutRange(calculateLeptonMetMt(lvec), stats.pmap.at("MetMtCut"));
       /////muon cuts
       else if(lep.type == PType::Muon){
-        if(cut == "DoDiscrByTightID") passCuts = passCuts && _Muon->tight->at(i);
-        else if(cut == "DoDiscrBySoftID") passCuts = passCuts && _Muon->soft->at(i);
+        if(cut == "DoDiscrByTightID") passCuts = passCuts && _Muon->tight[i];
+        else if(cut == "DoDiscrBySoftID") passCuts = passCuts && _Muon->soft[i];
       }
       ////electron cuts
       else if(lep.type == PType::Electron){
-        if(cut == "DoDiscrByVetoID") passCuts = passCuts && _Electron->isPassVeto->at(i);
-        else if(cut == "DoDiscrByLooseID" ) passCuts = passCuts && _Electron->isPassLoose->at(i);
-        else if(cut == "DoDiscrByMediumID") passCuts = passCuts && _Electron->isPassMedium->at(i);
-        else if(cut == "DoDiscrByTightID" ) passCuts = passCuts && _Electron->isPassTight->at(i);
-        else if(cut == "DoDiscrByHEEPID"  ) passCuts = passCuts && _Electron->isPassHEEPId->at(i);
+        if(cut == "DoDiscrByHLTID"){
+          std::bitset<8> idvariable(_Electron->cutBased_HLTPreSel[i]);
+          if(ival(ePos) - ival(CUTS::eRElec1)){
+            passCuts = passCuts && (_Electron->cbHLTIDele1&idvariable).count();
+          }else{
+            passCuts = passCuts && (_Electron->cbHLTIDele2&idvariable).count();
+          }
+        }
+        if(cut == "DoDiscrByCBID"){
+          std::bitset<8> idvariable(_Electron->cutBased[i]);
+          if(ival(ePos) - ival(CUTS::eRElec1)){
+            passCuts = passCuts && (_Electron->cbIDele1&idvariable).count();
+          }else{
+            passCuts = passCuts && (_Electron->cbIDele2&idvariable).count();
+          }
+        }
+        else if(cut == "DoDiscrByHEEPID")
+         passCuts = passCuts && _Electron->isPassHEEPId[i];
       }
       else if(lep.type == PType::Tau){
         if(cut == "DoDiscrByCrackCut") passCuts = passCuts && !isInTheCracks(lvec.Eta());
         /////tau cuts
-        else if(cut == "DoDzCut") passCuts = passCuts && (_Tau->leadChargedCandDz_pv->at(i) <= stats.dmap.at("DzCutThreshold"));
-        else if(cut == "DoDiscrByLeadTrack") passCuts = passCuts && (_Tau->leadChargedCandPt->at(i) >= stats.dmap.at("LeadTrackThreshold"));
+        else if(cut == "DoDzCut") passCuts = passCuts && (_Tau->dz[i] <= stats.dmap.at("DzCutThreshold"));
+        else if(cut == "DoDiscrByLeadTrack") passCuts = passCuts && (_Tau->leadTkPtOverTauPt[i]*_Tau->pt(i) >= stats.dmap.at("LeadTrackThreshold"));
              // ----Electron and Muon vetos
         else if (cut == "DoDiscrAgainstElectron") passCuts = passCuts && _Tau->pass_against_Elec(ePos, i);
         else if (cut == "SelectTausThatAreElectrons") passCuts = passCuts && !_Tau->pass_against_Elec(ePos, i);
@@ -1467,11 +1583,11 @@ void Analyzer::getGoodRecoLeptons(const Lepton& lep, const CUTS ePos, const CUTS
         else if (cut == "SelectTausThatAreMuons") passCuts = passCuts &&  !_Tau->pass_against_Muon(ePos, i);
 
         else if(cut == "DiscrByProngType") {
-          passCuts = passCuts && (stats.smap.at("ProngType").find("hps") == std::string::npos || _Tau->decayModeFindingNewDMs->at(i) != 0);
-          passCuts = passCuts && passProng(stats.smap.at("ProngType"), _Tau->decayMode->at(i));
+          passCuts = passCuts && (stats.smap.at("ProngType").find("hps") == std::string::npos || _Tau->DecayModeNewDMs[i] != 0);
+          passCuts = passCuts && passProng(stats.smap.at("ProngType"), _Tau->decayMode[i]);
         }
-        else if(cut == "decayModeFindingNewDMs") passCuts = passCuts && _Tau->decayModeFindingNewDMs->at(i) != 0;
-        else if(cut == "decayModeFinding") passCuts = passCuts && _Tau->decayModeFinding->at(i) != 0;
+        else if(cut == "decayModeFindingNewDMs") passCuts = passCuts && _Tau->DecayModeNewDMs[i] != 0;
+        else if(cut == "decayModeFinding") passCuts = passCuts && _Tau->DecayMode[i] != 0;
               // ----anti-overlap requirements
         else if(cut == "RemoveOverlapWithMuon1s") passCuts = passCuts && !isOverlaping(lvec, *_Muon, CUTS::eRMuon1, stats.dmap.at("Muon1MatchingDeltaR"));
         else if(cut == "RemoveOverlapWithMuon2s") passCuts = passCuts && !isOverlaping(lvec, *_Muon, CUTS::eRMuon2, stats.dmap.at("Muon2MatchingDeltaR"));
@@ -1512,8 +1628,8 @@ void Analyzer::getGoodRecoJets(CUTS ePos, const PartStats& stats, const int syst
       if(!passCuts) break;
       
     /// BJet specific
-      else if(cut == "ApplyJetBTagging") passCuts = passCuts && (_Jet->bDiscriminator->at(i) > stats.dmap.at("JetBTaggingCut"));
-      else if(cut == "MatchBToGen") passCuts = passCuts && (isData ||  abs(_Jet->partonFlavour->at(i)) == 5);
+      else if(cut == "ApplyJetBTagging") passCuts = passCuts && (_Jet->bDiscriminator[i] > stats.dmap.at("JetBTaggingCut"));
+      //else if(cut == "MatchBToGen") passCuts = passCuts && (isData ||  abs(_Jet->partonFlavour->at(i)) == 5);
       else if(cut == "ApplyLooseID") passCuts = passCuts && _Jet->passedLooseJetID(i);
     // ----anti-overlap requirements
       else if(cut == "RemoveOverlapWithMuon1s") passCuts = passCuts && !isOverlaping(lvec, *_Muon, CUTS::eRMuon1, stats.dmap.at("Muon1MatchingDeltaR"));
@@ -1523,8 +1639,8 @@ void Analyzer::getGoodRecoJets(CUTS ePos, const PartStats& stats, const int syst
       else if(cut == "RemoveOverlapWithTau1s") passCuts = passCuts && !isOverlaping(lvec, *_Tau, CUTS::eRTau1, stats.dmap.at("Tau1MatchingDeltaR"));
       else if (cut =="RemoveOverlapWithTau2s") passCuts = passCuts && !isOverlaping(lvec, *_Tau, CUTS::eRTau2, stats.dmap.at("Tau2MatchingDeltaR"));
       else if(cut == "UseBtagSF") {
-        double bjet_SF = reader.eval_auto_bounds("central", BTagEntry::FLAV_B, lvec.Eta(), lvec.Pt());
-        passCuts = passCuts && (isData || ((double) rand()/(RAND_MAX)) <  bjet_SF);
+        //double bjet_SF = reader.eval_auto_bounds("central", BTagEntry::FLAV_B, lvec.Eta(), lvec.Pt());
+        //passCuts = passCuts && (isData || ((double) rand()/(RAND_MAX)) <  bjet_SF);
       }
     }
 
@@ -1834,8 +1950,8 @@ void Analyzer::getGoodRecoFatJets(CUTS ePos, const PartStats& stats, const int s
     for( auto cut: stats.bset) {
       if(!passCuts) break;
 
-      else if(cut == "ApplyJetWTagging") passCuts = passCuts && (passCutRange(_FatJet->tau2->at(i)/_FatJet->tau1->at(i), stats.pmap.at("JetTau2Tau1Ratio")) &&
-                                                     passCutRange(_FatJet->PrunedMass->at(i), stats.pmap.at("JetWmassCut")));
+      else if(cut == "ApplyJetWTagging") passCuts = passCuts && (passCutRange(_FatJet->tau2[i]/_FatJet->tau1[i], stats.pmap.at("JetTau2Tau1Ratio")) &&
+                                                     passCutRange(_FatJet->PrunedMass[i], stats.pmap.at("JetWmassCut")));
     // ----anti-overlap requirements
       else if(cut == "RemoveOverlapWithMuon1s") passCuts = passCuts && !isOverlaping(lvec, *_Muon, CUTS::eRMuon1, stats.dmap.at("Muon1MatchingDeltaR"));
       else if (cut =="RemoveOverlapWithMuon2s") passCuts = passCuts && !isOverlaping(lvec, *_Muon, CUTS::eRMuon2, stats.dmap.at("Muon2MatchingDeltaR"));
@@ -1885,25 +2001,13 @@ bool Analyzer::isInTheCracks(float etaValue){
 
 
 ///sees if the event passed one of the two cuts provided
-void Analyzer::TriggerCuts(std::vector<int>& prevTrig, const std::vector<std::string>& trigvec, CUTS ePos) {
+void Analyzer::TriggerCuts(CUTS ePos) {
   if(! neededCuts.isPresent(ePos)) return;
-  //cout<<" trigger "<<Trigger_decision->size()<<std::endl;
-  if(version==1){
-    for(size_t i = 0; i < trigvec.size(); i++) {
-      for(size_t j =0; j<Trigger_decisionV1->size();  j++){
-        //cout<<"i:  "<<prevTrig.at(i)<<" j:  "<<j<<" dec(j):  "<<Trigger_decisionV1->at(j)<<std::endl;
-        if(prevTrig.at(i)==Trigger_decisionV1->at(j)){
-          active_part->at(ePos)->push_back(0);
-          return;
-        }
-      }
-    }
-  }else{
-    for(int i = 0; i < (int)trigvec.size(); i++) {
-      if(Trigger_decision->at(prevTrig.at(i)) == 1) {
-        active_part->at(ePos)->push_back(0);
-        return;
-      }
+  for(bool* trigger : trig_decision){
+   //#std::cout<< "trig_decision: "<< *trigger << std::endl;
+    if(*trigger){
+      active_part->at(ePos)->push_back(0);
+      return;
     }
   }
 }
@@ -2331,7 +2435,8 @@ double Analyzer::getWkfactor(){
 
 ////Grabs a list of the groups of histograms to be filled and asked Fill_folder to fill up the histograms
 void Analyzer::fill_histogram() {
-  if(distats["Run"].bfind("ApplyGenWeight") && gen_weight == 0.0) return;
+  
+  if(!isData && distats["Run"].bfind("ApplyGenWeight") && gen_weight == 0.0) return;
 
   if(isData && blinded && maxCut == SignalRegion) return;
 
@@ -2472,6 +2577,7 @@ void Analyzer::fill_Folder(std::string group, const int max, Histogramer &ihisto
         ihisto.addVal(2, group,ihisto.get_maxfolder(), "Events", (gen_weight > 0) ? 1.0 : -1.0);
       }
       ihisto.addVal(wgt, group, ihisto.get_maxfolder(), "Weight", 1);
+      ihisto.addVal(nTruePU, group, ihisto.get_maxfolder(), "PUWeight", 1);
     }
     histAddVal(true, "Events");
     histAddVal(bestVertices, "NVertices");
@@ -2537,7 +2643,7 @@ void Analyzer::fill_Folder(std::string group, const int max, Histogramer &ihisto
     TLorentzVector lep2;
     for(size_t igen=0; igen<_Gen->size(); igen++){
       //if a Z boson is explicitly there
-      if(abs(_Gen->pdg_id->at(igen))==11 or abs(_Gen->pdg_id->at(igen))==13 or abs(_Gen->pdg_id->at(igen))==15){
+      if(abs(_Gen->pdg_id[igen])==11 or abs(_Gen->pdg_id[igen])==13 or abs(_Gen->pdg_id[igen])==15){
         if(lep1!=TLorentzVector(0,0,0,0)){
           lep2= _Gen->p4(igen);
           mass=(lep1+lep2).M();
@@ -2565,25 +2671,35 @@ void Analyzer::fill_Folder(std::string group, const int max, Histogramer &ihisto
       histAddVal(part->p4(it).DeltaPhi(_MET->p4()), "MetDphi");
       
       if(part->type == PType::Tau) {
-        if(_Tau->nProngs->at(it) == 1){
-          histAddVal(part->pt(it), "Pt_1prong");
-        }else if(_Tau->nProngs->at(it) == 3){
-          histAddVal(part->pt(it), "Pt_3prong");
-        }
-        histAddVal(_Tau->nProngs->at(it), "NumSignalTracks");
+        //if(_Tau->nProngs->at(it) == 1){
+          //histAddVal(part->pt(it), "Pt_1prong");
+        //}else if(_Tau->nProngs->at(it) == 3){
+          //histAddVal(part->pt(it), "Pt_3prong");
+        //}
+        //histAddVal(_Tau->nProngs->at(it), "NumSignalTracks");
         histAddVal(_Tau->charge(it), "Charge");
-        histAddVal(_Tau->leadChargedCandPt->at(it), "SeedTrackPt");
-        histAddVal(_Tau->leadChargedCandDz_pv->at(it), "leadChargedCandDz");
+        histAddVal(_Tau->againstElectron[it], "againstElectron");
+        histAddVal(_Tau->againstMuon[it], "againstMuon");
+        histAddVal(_Tau->DecayMode[it], "DecayMode");
+        histAddVal(_Tau->DecayModeNewDMs[it], "DecayModeNewDMs");
+        histAddVal(_Tau->MVAoldDM[it], "MVAoldDM");
+        histAddVal(_Tau->decayMode[it], "decayMode");
+        histAddVal(_Tau->leadTkDeltaEta[it], "leadTkDeltaEta");
+        histAddVal(_Tau->leadTkDeltaPhi[it], "leadTkDeltaPhi");
+        histAddVal(_Tau->leadTkPtOverTauPt[it], "leadTkPtOverTauPt");
+        histAddVal(_Tau->dz[it], "dz");
+        //histAddVal(_Tau->leadChargedCandPt->at(it), "SeedTrackPt");
+        //histAddVal(_Tau->leadChargedCandDz_pv->at(it), "leadChargedCandDz");
       }
       if(part->type != PType::Jet) {
         histAddVal(calculateLeptonMetMt(part->p4(it)), "MetMt");
       }
       if(part->type == PType::FatJet ) {
-        histAddVal(_FatJet->PrunedMass->at(it), "PrunedMass");
-        histAddVal(_FatJet->SoftDropMass->at(it), "SoftDropMass");
-        histAddVal(_FatJet->tau1->at(it), "tau1");
-        histAddVal(_FatJet->tau2->at(it), "tau2");
-        histAddVal(_FatJet->tau2->at(it)/_FatJet->tau1->at(it), "tau2Overtau1");
+        histAddVal(_FatJet->PrunedMass[it], "PrunedMass");
+        histAddVal(_FatJet->SoftDropMass[it], "SoftDropMass");
+        histAddVal(_FatJet->tau1[it], "tau1");
+        histAddVal(_FatJet->tau2[it], "tau2");
+        histAddVal(_FatJet->tau2[it]/_FatJet->tau1[it], "tau2Overtau1");
       }
     }
     
@@ -2904,22 +3020,22 @@ void Analyzer::fill_Folder(std::string group, const int max, Histogramer &ihisto
             histAddVal((_Tau->p4(matchedTauInd)+unmatchedEle).M(), "DiEleGoodTauMatchMass");
             histAddVal((matchedEle+unmatchedEle).M(), "DiEleEleGoodMatchMass");
             histAddVal(matchedEle.Pt(), "DiEleEleGoodMatchPt");
-            histAddVal(_Tau->leadChargedCandPtError->at(matchedTauInd),"DiEleleadChargedCandPtErrorGoodMatched");
-            histAddVal(_Tau->leadChargedCandValidHits->at(matchedTauInd),"DiEleleadChargedCandValidHitGoodMatched");
+            //histAddVal(_Tau->leadChargedCandPtError->at(matchedTauInd),"DiEleleadChargedCandPtErrorGoodMatched");
+            //histAddVal(_Tau->leadChargedCandValidHits->at(matchedTauInd),"DiEleleadChargedCandValidHitGoodMatched");
             histAddVal2( matchedEle.Pt(),   (_Tau->p4(matchedTauInd).Pt()-matchedEle.Pt())/matchedEle.Pt(), "DiEleTauGoodMatchPt_vs_DeltaPt");
             histAddVal2( matchedEle.Pt(),   matchedEle.Eta(), "DiEleTauGoodMatchPt_vs_eta");
-            histAddVal2( _Tau->pt(matchedTauInd),   _Tau->decayMode->at(matchedTauInd), "DiEleTauGoodMatchPt_vs_Decay");
+            histAddVal2( _Tau->pt(matchedTauInd),   _Tau->decayMode[matchedTauInd], "DiEleTauGoodMatchPt_vs_Decay");
           }else{
             histAddVal(_Tau->p4(matchedTauInd).Pt(), "DiEleTauMatchPt");
             histAddVal(_Tau->p4(matchedTauInd).Pt()-matchedEle.Pt(), "DiEleTauMatchDeltaPt");
             histAddVal((_Tau->p4(matchedTauInd)+unmatchedEle).M(), "DiEleTauMatchMass");
             histAddVal((matchedEle+unmatchedEle).M(), "DiEleEleMatchMass");
             histAddVal(matchedEle.Pt(), "DiEleEleMatchPt");
-            histAddVal(_Tau->leadChargedCandPtError->at(matchedTauInd),"DiEleleadChargedCandPtErrorMatched");
-            histAddVal(_Tau->leadChargedCandValidHits->at(matchedTauInd),"DiEleleadChargedCandValidHitsMatched");
+            //histAddVal(_Tau->leadChargedCandPtError->at(matchedTauInd),"DiEleleadChargedCandPtErrorMatched");
+            //histAddVal(_Tau->leadChargedCandValidHits->at(matchedTauInd),"DiEleleadChargedCandValidHitsMatched");
             histAddVal2( matchedEle.Pt(),   (_Tau->p4(matchedTauInd).Pt()-matchedEle.Pt())/matchedEle.Pt(), "DiEleTauMatchPt_vs_DeltaPt");
             histAddVal2( matchedEle.Pt(),   matchedEle.Eta(), "DiEleTauMatchPt_vs_eta");
-            histAddVal2( _Tau->pt(matchedTauInd),   _Tau->decayMode->at(matchedTauInd), "DiEleTauMatchPt_vs_Decay");
+            histAddVal2( _Tau->pt(matchedTauInd),   _Tau->decayMode[matchedTauInd], "DiEleTauMatchPt_vs_Decay");
           }
         }else{
           histAddVal((part1+part2).M(), "DiEleEleUnMatchMass");
@@ -2935,7 +3051,7 @@ void Analyzer::fill_Folder(std::string group, const int max, Histogramer &ihisto
             }
           }
           if (found>=0){
-            histAddVal(_Jet->chargedMultiplicity->at(found), "DiEleEleUnMatchJetMultiplicity");
+            //histAddVal(_Jet->chargedMultiplicity[found], "DiEleEleUnMatchJetMultiplicity");
           }else{
             histAddVal(-1, "DiEleEleUnMatchJetMultiplicity");
           }
