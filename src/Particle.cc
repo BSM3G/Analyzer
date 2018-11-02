@@ -201,6 +201,7 @@ Generated::Generated(TTree* _BOOM, std::string filename, std::vector<std::string
   SetBranch("Gen_motherpdg_id", motherpdg_id);
   SetBranch("Gen_status", status);
   SetBranch("Gen_BmotherIndex", BmotherIndex);
+  SetBranch("Gen_numDaught",numDaught);      //4.22.18
 }
 
 

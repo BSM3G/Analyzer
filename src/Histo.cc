@@ -14,7 +14,6 @@ outfile(nullptr), Npdf(_Npdf), isData(_isData) {
   }else{
     read_syst(syst_unvertainties);
   }
-  
   NFolders = folders.size();
   read_hist(histname);
 

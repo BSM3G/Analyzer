@@ -19,7 +19,7 @@ void Systematics::shiftParticle(Particle& jet, TLorentzVector recJet, double con
    dPx+=recJet.Px()*(ratio-1);
    dPy+=recJet.Py()*(ratio-1);
    //WARNING change the particle content for the particle
-   recJet*=ratio;
+   recJet=recJet*ratio;
    jet.addP4Syst(recJet, syst);
    return;
 }
