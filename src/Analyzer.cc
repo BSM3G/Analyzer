@@ -984,9 +984,9 @@ void Analyzer::setupGeneral() {
     
    for( int i=0; i<BOOM->GetListOfBranches()->GetSize(); i++){
 	   std::string branch_name(BOOM->GetListOfBranches()->At(i)->GetName());
-	   if (branch_name.find("HLT_")!=std::string::npos){
-           	std::cout<< branch_name << std::endl;
-	   }
+	   //if (branch_name.find("HLT_")!=std::string::npos){
+	   //std::cout<< branch_name << std::endl;
+	   //}
    }
 
 /*
@@ -1441,18 +1441,26 @@ void Analyzer::getGoodRecoLeptons(const Lepton& lep, const CUTS ePos, const CUTS
       }
       ////electron cuts
       else if(lep.type == PType::Electron){
+	//std::cout << "got an electron to check..." << std::endl;
         if(cut == "DoDiscrByHLTID"){
           std::bitset<8> idvariable(_Electron->cutBased_HLTPreSel[i]);
-          if(ival(ePos) - ival(CUTS::eRElec1)){
+          if(ival(ePos) - ival(CUTS::eRElec2)){ //test if it is electron1
             passCuts = passCuts && (_Electron->cbHLTIDele1&idvariable).count();
+	    //std::cout << "it's an elec1..." << endl;
           }else{
             passCuts = passCuts && (_Electron->cbHLTIDele2&idvariable).count();
           }
         }
         if(cut == "DoDiscrByCBID"){
+	  //std::cout << "cutBased[i]: " << (_Electron->cutBased[i]) << std::endl;
           std::bitset<8> idvariable(_Electron->cutBased[i]);
-          if(ival(ePos) - ival(CUTS::eRElec1)){
+          if(ival(ePos) - ival(CUTS::eRElec2)){ //test if it is electron1
+	    //std::cout << "cbIDele1: " << (_Electron->cbIDele1) << std::endl;
+	    //std::cout << "idvariable: " << (idvariable) << std::endl;
+	    //std::cout << "the AND: " << (_Electron->cbIDele1&idvariable) << std::endl;
             passCuts = passCuts && (_Electron->cbIDele1&idvariable).count();
+	    //std::cout << "it's an elec1..." << std::endl;
+	    //std::cout << "passCuts value2: " << passCuts << std::endl;
           }else{
             passCuts = passCuts && (_Electron->cbIDele2&idvariable).count();
           }
