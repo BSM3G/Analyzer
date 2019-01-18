@@ -122,6 +122,7 @@ int main (int argc, char* argv[]) {
     Nentries=100;
     testing.nentries=100;
   }
+  //testing.checkParticleDecayList(); 01.16.19
   //main event loop
   for(size_t i=0; i < Nentries; i++) {
     if(i==0){
@@ -130,6 +131,8 @@ int main (int argc, char* argv[]) {
     testing.clear_values();
     testing.preprocess(i);
     testing.fill_efficiency();
+    //if (i < 25)
+    //{testing.writeParticleDecayList(i);}  //01.16.19:  This will write the particle decay list for the first 25 events.
     testing.fill_histogram();
     spechialAna.analyze();
     //this will be set if ctrl+c is pressed

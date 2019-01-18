@@ -61,7 +61,9 @@ public:
   void fill_histogram();
   void fill_Tree();
   void setControlRegions() { histo.setControlRegions();}
-
+  void checkParticleDecayList(); //01.16.19
+  void writeParticleDecayList(int); //01.16.19
+  void getGoodGenBJet(); //01.16.19
   std::vector<int>* getList(CUTS ePos) {return goodParts[ePos];}
   double getMet() {return _MET->pt();}
   double getHT() {return _MET->HT();}
@@ -107,6 +109,7 @@ public:
   void getGoodGen(const PartStats&);
   void getGoodRecoLeptons(const Lepton&, const CUTS, const CUTS, const PartStats&, const int);
   void getGoodRecoJets(CUTS, const PartStats&, const int);
+  void getGoodRecoBJets(CUTS, const PartStats&, const int); //01.16.19
   void getGoodRecoFatJets(CUTS, const PartStats&, const int);
 
   void getGoodLeptonCombos(Lepton&, Lepton&, CUTS, CUTS, CUTS, const PartStats&, const int);
@@ -123,6 +126,7 @@ public:
   bool isZdecay(const TLorentzVector&, const Lepton&);
 
   bool isOverlaping(const TLorentzVector&, Lepton&, CUTS, double);
+  bool isOverlapingB(const TLorentzVector&, Jet&, CUTS, double); //01.17.19
   bool passProng(std::string, int);
   bool isInTheCracks(float);
   bool passedLooseJetID(int);
@@ -130,7 +134,10 @@ public:
   double getTauDataMCScaleFactor(int updown);
   double getWkfactor();
   double getZBoostWeight();
-
+  double getTopBoostWeight(); //01.15.19
+  double getBJetSF(CUTS, const PartStats&); //01.16.19
+  double getBJetSFResUp(CUTS, const PartStats&); //01.16.19
+  double getBJetSFResDown(CUTS, const PartStats&); //01.16.19
   std::pair<double, double> getPZeta(const TLorentzVector&, const TLorentzVector&);
   void create_fillInfo();
 

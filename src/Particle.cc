@@ -198,6 +198,7 @@ Generated::Generated(TTree* _BOOM, std::string filename, std::vector<std::string
   SetBranch("GenPart_genPartIdxMother", genPartIdxMother);
   SetBranch("GenPart_status", status);
   SetBranch("GenPart_statusFlags", statusFlags);
+  SetBranch("Gen_numDaught",numDaught); //01.15.19
 }
 
 

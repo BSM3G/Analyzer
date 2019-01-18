@@ -55,7 +55,7 @@ struct EnumHash {
 
 enum class CUTS {
   eGen,
-  eGTau,        eGTop,        eGElec,       eGMuon,       eGZ,        eGW,       eGHiggs, eGJet,
+    eGTau,        eGTop,        eGElec,       eGMuon,       eGZ,        eGW,       eGHiggs, eGJet, eGBJet,
   eRVertex,     eRMuon1,      eRMuon2,      eRElec1,      eRElec2,    eRTau1,   eRTau2,
   eRJet1,       eRJet2,       eRCenJet,     eR1stJet,     eR2ndJet,   eRBJet,   eRWjet,
   eDiElec,      eDiMuon,      eDiTau,       eDiJet,
@@ -70,7 +70,7 @@ enum class CUTS {
 static std::unordered_map<CUTS, std::string, EnumHash> enumNames {
   {CUTS::eGen, "eGen"},
   {CUTS::eGTau, "eGTau"}, {CUTS::eGTop, "eGTop"}, {CUTS::eGElec, "eGElec"}, {CUTS::eGMuon, "eGMuon"}, {CUTS::eGZ, "eGZ"},
-  {CUTS::eGW, "eGW"}, {CUTS::eGHiggs, "eGHiggs"}, {CUTS::eGJet, "eGJet"},  {CUTS::eRVertex, "eRVertex"},
+													{CUTS::eGW, "eGW"}, {CUTS::eGHiggs, "eGHiggs"}, {CUTS::eGJet, "eGJet"},  {CUTS::eGBJet, "eGBJet"}, {CUTS::eRVertex, "eRVertex"},
   {CUTS::eRMuon1, "eRMuon1"}, {CUTS::eRMuon2, "eRMuon2"}, {CUTS::eRElec1, "eRElec1"}, {CUTS::eRElec2, "eRElec2"},
   {CUTS::eRTau1, "eRTau1"},   {CUTS::eRTau2, "eRTau2"}, {CUTS::eRJet1, "eRJet1"}, {CUTS::eRJet2, "eRJet2"},
   {CUTS::eRCenJet, "eRCenJet"}, {CUTS::eR1stJet, "eR1stJet"}, {CUTS::eR2ndJet, "eR2ndJet"}, {CUTS::eRBJet, "eRBJet"},

@@ -139,6 +139,7 @@ public:
   int  pdg_id[MAXINDEX];
   int  status[MAXINDEX];
   int  statusFlags[MAXINDEX];
+  int  numDaught[MAXINDEX]; //01.15.19
   
 };
 
